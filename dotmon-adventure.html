@@ -353,7 +353,7 @@ const VILLAGERS=[
  {name:'어부 꼬마',x:20,y:67,dir:'down',pal:{c:'#2f5fa8',a:'#ffcc33',h:'#3a1f10'},lines:['언젠가 바다 건너 섬까지 헤엄쳐 갈 거야!']},
  {name:'노을 마을 소녀',x:12,y:64,dir:'left',pal:{c:'#ff8fb1',a:'#ffffff',h:'#5a3a22'},lines:['도감을 다 채우면 무슨 일이 일어날까? 궁금해!']},
  {name:'별빛 시장님',x:40,y:61,dir:'down',pal:{c:'#222',a:'#3a3a6a',h:'#999'},lines:['별빛 도시에 어서 오게. 이 도시엔 두 번째 체육관이 있지.','관장 하늘을 이기면 별빛 배지를 받을 수 있다네.']},
- {name:'연구원',x:47,y:61,dir:'right',pal:{c:'#ffffff',a:'#e8e8f0',h:'#3a3a3a'},lines:['거대화는 3턴 동안만 유지돼. 상대가 거대화하면 교체로 버티는 것도 방법이야.','초거대화 기술은 타입이 같을 때만 전용 기술로 바뀌지.']},
+ {name:'연구원',x:47,y:61,dir:'right',pal:{c:'#ffffff',a:'#e8e8f0',h:'#3a3a3a'},lines:['거대화는 3턴 동안만 유지돼. 상대가 거대화하면 교체로 버티는 것도 방법이야.','곳곳의 돌무더기에서 빛기둥이 솟는 걸 봤어? 레이드 둥지야! 지원 트레이너들과 10턴 안에 거대 보스를 쓰러뜨리면 잡을 기회가 생겨.','심해 해안 모래밭엔 황금빛 전설의 둥지가 있대. 전설의 몬스터를 동료로 맞이한 트레이너에게만 반응한다나 봐.','초거대화 기술은 타입이 같을 때만 전용 기술로 바뀌지.']},
  {name:'별빛 소년',x:58,y:67,dir:'up',pal:{c:'#3aa04a',a:'#e6c229',h:'#3a2a10'},lines:['밤마다 하늘에서 아스트라가 보인대! 진짜일까?','그리고 동쪽 고대의 숲 깊은 곳엔 도감 8종을 모두 채운 사람만 만날 수 있는 사슴이 산대!']}
 ];
 const HOUSES={
@@ -380,6 +380,16 @@ const LEGENDS=[
   unlock:'...하늘이 붉게 타오른다! 동쪽 전설의 땅, 불꽃 산 정상에서 불새의 울음소리가 들려왔다.',
   near:'...뜨거운 바람이 몰아친다. 바위들이 붉게 달아오른다.',roar:'키야아아아악──!',appear:'불꽃 기둥을 뚫고 전설의 불새 이그나가 날아올랐다!',gone:'불꽃이 되어 하늘 높이 날아갔다'}
 ];
+const RAIDS=[
+ {id:'r1',name:'호숫가 둥지',x:26,y:25,lv:16,stars:1,pool:['fox','crab','jelly','bird'],color:'#ff6b8a'},
+ {id:'r2',name:'바위 들판 둥지',x:58,y:23,lv:20,stars:2,pool:['seal','bunny','shroom','fly'],color:'#ffb03a'},
+ {id:'r3',name:'모래 언덕 둥지',x:30,y:52,lv:25,stars:3,pool:['fox','seal','bunny','crab','jelly'],color:'#c86bff'},
+ {id:'r4',name:'심해 해안 둥지',x:100,y:47,lv:30,stars:4,pool:['fox','seal','bunny','bird','shroom','fly','jelly','crab'],color:'#4ad8ff'},
+ {id:'r5',name:'전설의 둥지',x:80,y:48,lv:38,stars:5,legend:true,turns:12,pool:[],color:'#ffd23a'}
+];
+const raidPool=R=>R.legend?LEGENDS.map(L=>L.sp).filter(k=>G&&G.lc[k]):R.pool;
+const denAt=(x,y)=>RAIDS.find(R=>R.x===x&&R.y===y);
+const denOn=R=>!!(G&&G.badge&&!G.rd[R.id]&&raidPool(R).length);
 const legendHere=L=>!!(G&&L.cond()&&!G.lc[L.sp]&&!G.lg[L.sp]);
 const legendAt=(x,y)=>LEGENDS.find(L=>L.x===x&&L.y===y&&legendHere(L));
 const tileAt=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?'T':(x===16&&y>=32&&y<=34&&bridgeOpen())?'b':MAP[y][x];
@@ -390,15 +400,15 @@ let G=null;
 const P={x:16,y:10,tx:16,ty:10,dir:'down',moving:false,t:0,step:0};
 const DV={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 const expFor=l=>Math.floor(l*l*l*0.8);
-function stats(m){const s=SP[m.sp],L=m.lv;return{hp:(Math.floor(s.hp*2*L/50)+L+10)*(m._giant?2:1),atk:Math.floor(s.atk*2*L/50)+5,def:Math.floor(s.def*2*L/50)+5,spd:Math.floor(s.spd*2*L/50)+5};}
+function stats(m){const s=SP[m.sp],L=m.lv;return{hp:(Math.floor(s.hp*2*L/50)+L+10)*(m._giant?2:1)*(m._raid||1),atk:Math.floor(s.atk*2*L/50)+5,def:Math.floor(s.def*2*L/50)+5,spd:Math.floor(s.spd*2*L/50)+5};}
 function mkMon(sp,lv){const m={sp,lv,exp:expFor(lv),moves:[],hp:0};for(const[l,id]of SP[sp].learn)if(l<=lv&&!m.moves.includes(id))m.moves.push(id);while(m.moves.length>4)m.moves.shift();m.hp=stats(m).hp;return m;}
 const nm=m=>SP[m.sp].n;
-function newGame(sp){const st=mkMon(sp,5);st.gmax=true;G={party:[st],box:[],items:{ball:5,superball:0,potion:3,superpotion:0,revive:0,jelly:0},money:1000,seen:{[sp]:1},caught:{[sp]:1},badge:false,gymWins:0,beaten:{},gifts:{},lc:{},lg:{},ln:{}};Object.assign(P,{x:16,y:10,tx:16,ty:10,dir:'down',moving:false});}
+function newGame(sp){const st=mkMon(sp,5);st.gmax=true;G={party:[st],box:[],items:{ball:5,superball:0,potion:3,superpotion:0,revive:0,jelly:0},money:1000,seen:{[sp]:1},caught:{[sp]:1},badge:false,gymWins:0,beaten:{},gifts:{},lc:{},lg:{},ln:{},rd:{},rb:{}};Object.assign(P,{x:16,y:10,tx:16,ty:10,dir:'down',moving:false});}
 function healAll(){for(const m of G.party)m.hp=stats(m).hp;for(const m of G.box)m.hp=stats(m).hp;}
 const KEY='dotmon-adventure-v1';
 function save(){try{localStorage.setItem(KEY,JSON.stringify({G,P:{x:P.x,y:P.y,dir:P.dir}}));}catch(e){}}
 function loadSave(){try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
-function applySave(s){G=s.G;G.beaten=G.beaten||{};G.gifts=G.gifts||{};G.lc=G.lc||{};G.lg=G.lg||{};G.ln=G.ln||{};if(G.legendCaught){G.lc.astra=1;delete G.legendCaught;}delete G.legendGone;for(const k of ITEM_ORDER)G.items[k]=G.items[k]||0;if(G.money==null)G.money=1000;if(G.badge)G.band=true;for(const m of [...G.party,...G.box])delete m._giant;if(!G.party.concat(G.box).some(m=>m.gmax)){const st=G.party.find(m=>STARTERS.includes(m.sp));if(st)st.gmax=true;}Object.assign(P,s.P,{tx:s.P.x,ty:s.P.y,moving:false});}
+function applySave(s){G=s.G;G.beaten=G.beaten||{};G.gifts=G.gifts||{};G.lc=G.lc||{};G.lg=G.lg||{};G.ln=G.ln||{};G.rd=G.rd||{};G.rb=G.rb||{};if(G.legendCaught){G.lc.astra=1;delete G.legendCaught;}delete G.legendGone;for(const k of ITEM_ORDER)G.items[k]=G.items[k]||0;if(G.money==null)G.money=1000;if(G.badge)G.band=true;for(const m of [...G.party,...G.box]){delete m._giant;delete m._raid;}if(!G.party.concat(G.box).some(m=>m.gmax)){const st=G.party.find(m=>STARTERS.includes(m.sp));if(st)st.gmax=true;}Object.assign(P,s.P,{tx:s.P.x,ty:s.P.y,moving:false});}
 
 /* ================= input ================= */
 const held={up:false,down:false,left:false,right:false};
@@ -514,13 +524,14 @@ modes.world={lock:false,cool:0,lastBump:0,enter(){this.lock=false;},
   if(pressed.has('a')){const[dx,dy]=DV[P.dir];this.interact(P.x+dx,P.y+dy);return;}
   const d=heldDir();if(!d)return;P.dir=d;const[dx,dy]=DV[d],nx=P.x+dx,ny=P.y+dy,t=tileAt(nx,ny);
   if((t==='D'||t==='d'||t==='m'||t==='h'||t==='e')&&this.cool<=0){this.interact(nx,ny);return;}
-  if(walkable(t)&&!npcAt(nx,ny)&&!legendAt(nx,ny)){P.tx=nx;P.ty=ny;P.moving=true;P.t=0;P.step^=1;}
+  if(walkable(t)&&!npcAt(nx,ny)&&!legendAt(nx,ny)&&!denAt(nx,ny)){P.tx=nx;P.ty=ny;P.moving=true;P.t=0;P.step^=1;}
   else if(frame-this.lastBump>16){sfx.bump();this.lastBump=frame;}},
  onStep(){const T0=tileAt(P.x,P.y);if(T0==='A'&&Math.random()<.11){encounter();return true;}const rg=regionName(P.x,P.y);if(rg!==this.region){if(this.region)this.toast=110;this.region=rg;}
   for(const tr of TRAINERS){if(G.beaten[tr.id])continue;const[dx,dy]=DV[tr.dir];for(let i=1;i<=4;i++){const x=tr.x+dx*i,y=tr.y+dy*i;if(x===P.x&&y===P.y){trainerSpot(tr,true);return true;}if(!walkable(tileAt(x,y))||npcAt(x,y))break;}}
   if(tileAt(P.x,P.y)===','&&Math.random()<.11){encounter();return true;}return false;},
  async interact(x,y){const t=tileAt(x,y),tr=npcAt(x,y);
   {const L=legendAt(x,y);if(L){this.lock=true;await legendEvent(L);return;}}
+  {const R=denAt(x,y);if(R){this.lock=true;const st=await denEvent(R);if(!st){this.lock=false;this.cool=20;}return;}}
   if(tr&&tr.lines){this.lock=true;tr.dir={up:'down',down:'up',left:'right',right:'left'}[P.dir];tr.hold=240;for(const l of tr.lines)await msg(`${tr.name}: ${l}`);this.lock=false;return;}
   if(tr){this.lock=true;tr.dir={up:'down',down:'up',left:'right',right:'left'}[P.dir];if(G.beaten[tr.id]){await msg(`${tr.name}: ${tr.after}`);this.lock=false;}else trainerSpot(tr,false);return;}
   if(t==='S'){this.lock=true;const sg=SIGNS[x+','+y];await msg((typeof sg==='function'?sg():sg)||'...');this.lock=false;}
@@ -543,6 +554,11 @@ modes.world={lock:false,cool:0,lastBump:0,enter(){this.lock=false;},
     if(tr.alert>0){tr.alert--;rect(tx+2,ty-13,9,11,INK);rect(tx+3,ty-12,7,9,'#ffffff');rect(tx+5,ty-11,3,5,'#e5483f');rect(tx+5,ty-5,3,1,'#e5483f');}}
   for(const L of LEGENDS){if(!legendHere(L))continue;const lx=L.x*16-cx-4,ly=L.y*16-cy-10+((frame>>4)%2);if(lx<-40||ly<-40||lx>W+8||ly>H+8)continue;ellipse(lx+12,ly+26,11,3,'rgba(0,0,0,.25)');spr(IMG[L.sp],lx,ly,2);
     for(let i=0;i<8;i++){const a=frame/22+i*Math.PI/4;if((frame>>2)%8!==i)rect(lx+12+Math.cos(a)*18,ly+12+Math.sin(a)*13,2,2,L.spark);}}
+  for(const R of RAIDS){const dx=R.x*16-cx,dy=R.y*16-cy;if(dx<-16||dy<-48||dx>W||dy>H+8)continue;const on=denOn(R);
+    ellipse(dx+8,dy+10,7,4,'#3a2f3f');ellipse(dx+8,dy+10,5,3,on?R.color:'#5a5060');
+    for(const[sx,sy]of[[0,6],[12,6],[1,12],[11,12],[6,3]]){rect(dx+sx,dy+sy,4,4,'#6d6a78');rect(dx+sx,dy+sy,4,1,'#a5a2b0');}
+    if(on){const h=26+((frame>>3)%2)*2;ctx.globalAlpha=.45+.15*Math.sin(frame/10);rect(dx+5,dy+10-h,6,h,R.color);rect(dx+7,dy+10-h-6,2,6,'#ffffff');ctx.globalAlpha=1;
+      for(let i=0;i<4;i++){const t=(frame+i*15)%60;rect(dx+3+((i*5)%10),dy+8-t/2,2,2,i%2?'#ffffff':R.color);}}}
   const px=Math.round(rx*16-cx)+2,py=Math.round(ry*16-cy)+1;
   rect(px+2,py+13,8,2,'rgba(0,0,0,.18)');
   const fr=P.moving&&P.t>=2&&P.t<7&&P.step?1:0,dir=P.dir==='left'?'right':P.dir;spr(PIMG[dir][fr],px,py,1,P.dir==='left');
@@ -553,7 +569,7 @@ modes.world={lock:false,cool:0,lastBump:0,enter(){this.lock=false;},
 
 async function centerEvent(){await msg('어서 오세요! 도트몬 센터예요.');
   note='무엇을 도와드릴까요?';const c=await choose(['회복','보관함'],{x:170,y:84,w:64});note=null;if(c===1)await boxMenu();
-  await msg('몬스터를 회복시켜 드릴게요.',10);fx={t:0,kind:'flash',len:30,res:()=>{}};sfx.heal();await wait(40);healAll();G.lg={};
+  await msg('몬스터를 회복시켜 드릴게요.',10);fx={t:0,kind:'flash',len:30,res:()=>{}};sfx.heal();await wait(40);healAll();G.lg={};G.rd={};
   if(G.items.ball+G.items.superball===0&&G.money<200){G.items.ball=3;await msg('캡슐이 다 떨어졌군요. 3개 챙겨 드릴게요!');}
   await msg('모두 건강해졌어요. 또 오세요!');save();}
 const BOX_CAP=120,BOX_PAGE=24;
@@ -602,6 +618,47 @@ async function gym2Win(){await msg('하늘: 별빛보다 눈부신 승부였어!
 async function legendEvent(L){await msg(L.near);
   seq(L.cry,.22,'sawtooth',.05,.16);fx={t:0,kind:'flash',len:40,res:()=>{}};await wait(50);
   await msg(`${SP[L.sp].n}: ${L.roar}`);startBattle({wild:mkMon(L.sp,L.lv),legend:L});}
+const HELPERS=[{name:'연구원 보라'},{name:'캠퍼 진우'},{name:'소녀 다은'},{name:'등산가 태민'},{name:'수영선수 하윤'},{name:'모험가 시우'}];
+async function denEvent(R){const star='★'.repeat(R.stars)+'☆'.repeat(Math.max(0,4-R.stars)),pool=raidPool(R),turns=R.turns||10;
+  if(R.legend&&G.badge&&!pool.length){await msg('황금빛 돌무더기가 고요하게 잠들어 있다...');await msg('전설의 기운이 부족하다. 전설의 몬스터를 동료로 맞이하면 반응할 것 같다.');return false;}
+  if(!G.badge){await msg('돌무더기 틈에서 희미한 빛이 새어 나온다...');await msg('도트 배지를 가진 트레이너에게만 반응하는 것 같다.');return false;}
+  if(G.rd[R.id]){await msg(`${R.name}의 빛이 잠잠해졌다. 도트몬 센터에서 쉬고 오면 다시 빛날 것 같다.`);return false;}
+  if(!G.rb[R.id]||!pool.includes(G.rb[R.id]))G.rb[R.id]=pool[rnd(0,pool.length-1)];const sp=G.rb[R.id];G.seen[sp]=1;
+  if(R.legend){const L=LEGENDS.find(L=>L.sp===sp);seq(L.cry,.2,'sawtooth',.04,.15);await msg('황금빛 기둥이 하늘을 꿰뚫는다! 전설의 기운이 소용돌이친다...');}
+  seq([262,330,392,523],.12,'square',.04,.1);fx={t:0,kind:'flash',len:16,res:()=>{}};
+  await msg(`${R.name}  ${star}\n빛기둥 속에서 거대한 ${SP[sp].n}(Lv.${R.lv}, ${SP[sp].t} 타입)의 그림자가 보인다!`);
+  note=`${R.legend?'전설 레이드':'레이드 배틀'}에 도전할까?  (제한 ${turns}턴 · 지원 트레이너 2명)`;const c=await choose(['도전한다','그만둔다'],{x:162,y:84,w:72});note=null;
+  if(c!==0){await msg('빛기둥이 조용히 일렁이고 있다...');return false;}
+  if(!G.party.some(m=>m.hp>0)){await msg('싸울 수 있는 몬스터가 없다!');return false;}
+  const hs=HELPERS.slice().sort(()=>Math.random()-.5).slice(0,2),base=BASE8.filter(k=>k!==sp);
+  const allies=hs.map(h=>({name:h.name,m:mkMon(base[rnd(0,base.length-1)],Math.max(5,R.legend?R.lv:R.lv-2))}));
+  await msg(`${josa(allies[0].name,'과','와')} ${josa(allies[1].name,'이','가')} 함께 싸워 주러 달려왔다!`);
+  const boss=mkMon(sp,R.lv);boss._raid=3;boss.gmax=!!GMAX[sp];
+  startBattle({wild:boss,raid:{R,allies,left:turns,sh:0,shUsed:false,stun:0,brk:false}});return true;}
+async function allyAttack(al){const e=Bt.e,a=al.m,dt=SP[e.sp].t;let id=a.moves[rnd(0,a.moves.length-1)];
+  if(Math.random()<.6){let bv=-1;for(const k of a.moves){const v=MOVES[k].p*eff(MOVES[k].t,dt);if(v>bv){bv=v;id=k;}}}
+  const mv=MOVES[id];await msg(`${al.name}의 ${nm(a)}! ${mv.n}!`,12);
+  if(Math.random()*100>=mv.a){await msg('그러나 공격은 빗나갔다!',20);return;}
+  let{dmg,ef}=calcDmg(a,e,mv);dmg=raidHit(dmg,mv);ef>1?sfx.super():sfx.hit();Bt.blink.e=18;Bt.shake=4;e.hp=Math.max(0,e.hp-dmg);
+  await waitUntil(()=>Math.abs(Bt.disp.e-e.hp)<.01&&Bt.blink.e<=0);if(ef>1)await msg('효과가 굉장했다!',16);await raidAfterHit();}
+function raidHit(dmg,mv){const r=Bt.raid;if(!r||r.sh<=0)return dmg;r.sh=Math.max(0,r.sh-(mv.p>=90?2:1));if(r.sh===0){r.brk=true;r.stunAt=r.left;}return Math.max(1,Math.floor(dmg*.2));}
+async function raidAfterHit(){const r=Bt.raid,e=Bt.e;if(!r||e.hp<=0)return;
+  if(r.brk){r.brk=false;Bt.shake=16;beep(880,.1,'square',.05);beep(440,.2,'square',.05,.1);await msg('보호막이 산산이 깨졌다! 보스가 비틀거린다!');}
+  else if(!r.shUsed&&e.hp<=stats(e).hp/2){r.shUsed=true;r.sh=r.R.stars+2;seq([392,523,659],.1,'triangle',.05,.08);await msg(`${josa(elabel(),'이','가')} 보호막을 펼쳤다! 공격이 잘 통하지 않는다!`);}}
+async function raidWin(){const r=Bt.raid,e=Bt.e,R=r.R;sfx.win();await msg('레이드 배틀에서 이겼다!');G.rd[R.id]=1;delete G.rb[R.id];
+  const c=R.lv*40;G.money+=c;await msg(`보상으로 ${c.toLocaleString()}코인을 받았다!`,20);
+  const rw=[['superball',R.stars>=2?2:1]];if(R.stars>=3)rw.push(['revive',R.stars>=5?2:1]);if(R.stars>=4)rw.push(['jelly',R.stars>=5?2:1]);
+  for(const[k,n]of rw)G.items[k]+=n;sfx.catch();await msg(rw.map(([k,n])=>`${ITEMS[k].n} ${n}개`).join(', ')+'를 받았다!');
+  for(const al of r.allies)await msg(`${al.name}: 덕분에 이겼어! 고마워!`,18);
+  const balls=['ball','superball'].filter(k=>G.items[k]>0);
+  if(!balls.length){await msg(`캡슐이 없다... ${josa(nm(e),'은','는')} 둥지의 빛 속으로 돌아갔다.`);return;}
+  await msg(`힘이 빠진 ${josa(nm(e),'이','가')} 눈앞에 쓰러져 있다! 캡슐을 던질 기회는 단 한 번!`);
+  note='어떤 캡슐을 던질까?';const ci=await choose([...balls.map(k=>`${ITEMS[k].n}×${G.items[k]}`),'던지지 않는다'],{x:140,y:70,w:96});note=null;
+  if(ci<0||ci>=balls.length){await msg(`${josa(nm(e),'은','는')} 둥지의 빛 속으로 돌아갔다.`);return;}
+  delete e._raid;e._giant=false;e.gmax=!!GMAX[e.sp];e.hp=1;Bt.disp.e=1;Bt.hideE=false;Bt.scale.e=4;
+  if(await throwBall(balls[ci])){e.hp=stats(e).hp;if(e.gmax&&(G.party.includes(e)||G.box.includes(e)))await msg(`${josa(nm(e),'은','는')} 초거대화 인자를 가지고 있다!`);}
+  else await msg(`${josa(nm(e),'은','는')} 둥지의 빛 속으로 돌아갔다.`);}
+async function raidFail(){Bt.shake=30;sfx.giant();await msg(`${josa(elabel(),'이','가')} 거센 폭풍을 일으켰다!`);await msg('둥지에서 튕겨 나왔다... 레이드 배틀 실패!');}
 async function legendNotices(){for(const L of LEGENDS){if(L.unlock&&!G.ln[L.sp]&&!G.lc[L.sp]&&L.cond()){G.ln[L.sp]=1;seq(L.cry,.2,'triangle',.05,.15);await msg(L.unlock);}}}
 async function trainerSpot(tr,seen){const w=modes.world;w.lock=true;
   if(seen){tr.alert=36;beep(1200,.08);beep(1500,.1,'square',.04,.08);await wait(36);tr.dir=P.x>tr.x?'right':P.x<tr.x?'left':P.y>tr.y?'down':'up';P.dir={up:'down',down:'up',left:'right',right:'left'}[tr.dir];}
@@ -714,13 +771,15 @@ function giantAura(cx,cy,sc,gm){const r=6*sc+6;for(let i=0;i<12;i++){const a=fra
 const Bt={e:null,team:null,trainer:null,ti:0,pi:0,phase:'busy',cur:0,mcur:0,disp:{p:0,e:0},blink:{p:0,e:0},lunge:{p:0,e:0},sink:{p:0,e:0},hideE:false,hideP:true,slideE:0,slideP:0,shake:0,capsule:null,runs:0};
 const act=()=>G.party[Bt.pi];
 const firstAlive=()=>Math.max(0,G.party.findIndex(m=>m.hp>0));
-const elabel=()=>(Bt.trainer?'상대 ':Bt.legend?'전설의 ':'야생 ')+nm(Bt.e);
+const elabel=()=>(Bt.trainer?'상대 ':Bt.legend?'전설의 ':Bt.raid?'레이드 보스 ':'야생 ')+nm(Bt.e);
 async function startBattle(cfg){sfx.enc();await transition('stripes');
-  Object.assign(Bt,{trainer:cfg.trainer||null,onWin:cfg.onWin||null,legend:cfg.legend||null,tGiant:!!cfg.giant,gUsed:false,eGUsed:false,arm:false,gs:{p:null,e:null},scale:{p:4,e:4},team:cfg.team||null,ti:0,e:cfg.team?cfg.team[0]:cfg.wild,pi:firstAlive(),phase:'busy',cur:0,mcur:0,hideE:false,hideP:true,slideE:130,slideP:-80,shake:0,capsule:null,runs:0,blink:{p:0,e:0},lunge:{p:0,e:0},sink:{p:0,e:0}});
+  Object.assign(Bt,{trainer:cfg.trainer||null,onWin:cfg.onWin||null,legend:cfg.legend||null,raid:cfg.raid||null,tGiant:!!cfg.giant,gUsed:false,eGUsed:false,arm:false,gs:{p:null,e:null},scale:{p:4,e:4},team:cfg.team||null,ti:0,e:cfg.team?cfg.team[0]:cfg.wild,pi:firstAlive(),phase:'busy',cur:0,mcur:0,hideE:false,hideP:true,slideE:130,slideP:-80,shake:0,capsule:null,runs:0,blink:{p:0,e:0},lunge:{p:0,e:0},sink:{p:0,e:0}});
+  if(Bt.raid){const e=Bt.e;e._giant=true;e.hp=stats(e).hp;Bt.gs.e={m:e,turns:99,gmax:!!(e.gmax&&GMAX[e.sp])};Bt.scale.e=6;}
   Bt.disp.e=Bt.e.hp;Bt.disp.p=act().hp;G.seen[Bt.e.sp]=1;if(Bt.legend)Bt.scale.e=5;setMode(modes.battle);fadeIn();
   await waitUntil(()=>Bt.slideE===0);
   if(Bt.trainer){await msg(`${josa(Bt.trainer,'이','가')} 승부를 걸어왔다!`);await msg(`${josa(Bt.trainer,'은','는')} ${josa(nm(Bt.e),'을','를')} 내보냈다!`,20);}
   else if(Bt.legend){await msg(Bt.legend.appear);}
+  else if(Bt.raid){Bt.shake=20;const RL=Bt.raid.R.legend;await msg(`${Bt.raid.R.name}의 ${RL?'전설 레이드':'레이드 배틀'} 시작!`);await msg(`${RL?'황금빛 기둥':'빛기둥'}을 뚫고 ${Bt.gs.e.gmax?'초거대':'거대'} ${josa((RL?'전설의 ':'')+nm(Bt.e),'이','가')} 나타났다!`);await msg(`제한 시간은 ${Bt.raid.left}턴! ${josa(Bt.raid.allies[0].name,'과','와')} ${josa(Bt.raid.allies[1].name,'과','와')} 힘을 합쳐 쓰러뜨리자!`);}
   else await msg(`앗! 야생 ${josa(nm(Bt.e),'이','가')} 나타났다!`);
   Bt.hideP=false;Bt.slideP=-80;await msg(`가랏! ${nm(act())}!`,16);Bt.phase='menu';}
 function battleTick(){const p=act();if(!p||!Bt.e)return;
@@ -736,19 +795,25 @@ modes.battle={
     if(pressed.has('menu')&&canGiant()){Bt.arm=!Bt.arm;Bt.arm?beep(660,.08,'sawtooth',.04):sfx.back();}
     if(pressed.has('a')){sfx.sel();doTurn({k:'move',id:p.moves[Bt.mcur],giant:Bt.arm});Bt.arm=false;}else if(pressed.has('b')){sfx.back();Bt.phase='menu';Bt.arm=false;}}},
  draw(){const p=act(),e=Bt.e;const sx=Bt.shake?rnd(-2,2):0,sy=Bt.shake?rnd(-1,1):0;ctx.save();ctx.translate(sx,sy);
-  if(Bt.legend){const c=Bt.legend.bg;rect(-4,-4,W+8,134,c[0]);rect(-4,26,W+8,22,c[1]);rect(-4,48,W+8,22,c[2]);rect(-4,70,W+8,60,c[3]);for(let i=0;i<24;i++){const x=(i*53)%W,y=(i*29)%66;if(((frame>>3)+i)%5)rect(x,y,1,1,'#ffffff');}}
+  const RLg=Bt.raid&&Bt.raid.R.legend&&e&&LEGENDS.find(L=>L.sp===e.sp);
+  if(RLg){const c=RLg.bg;rect(-4,-4,W+8,134,c[0]);rect(-4,26,W+8,22,c[1]);rect(-4,48,W+8,22,c[2]);rect(-4,70,W+8,60,c[3]);for(let i=0;i<16;i++){const x=(i*41+frame)%W,y=(i*17)%66;rect(x,y,1,3,i%2?'#ffd23a':RLg.spark);}}
+  else if(Bt.raid){rect(-4,-4,W+8,134,'#2a1838');rect(-4,26,W+8,22,'#3a2050');rect(-4,48,W+8,22,'#4a2a66');rect(-4,70,W+8,60,'#5a4a6a');const rc=Bt.raid.R.color;for(let i=0;i<10;i++){const x=(i*41+frame)%W,y=(i*17)%60;rect(x,y,1,3,rc);}}
+  else if(Bt.legend){const c=Bt.legend.bg;rect(-4,-4,W+8,134,c[0]);rect(-4,26,W+8,22,c[1]);rect(-4,48,W+8,22,c[2]);rect(-4,70,W+8,60,c[3]);for(let i=0;i<24;i++){const x=(i*53)%W,y=(i*29)%66;if(((frame>>3)+i)%5)rect(x,y,1,1,'#ffffff');}}
   else{rect(-4,-4,W+8,134,'#cfeeff');rect(-4,26,W+8,22,'#bfe6fb');rect(-4,48,W+8,22,'#b2dff6');rect(-4,70,W+8,60,'#a6d87c');}
   for(let x=0;x<W;x+=24)rect(x+(x%48?6:14),80+(x%72)/6,3,1,'#8fc466');for(let x=10;x<W;x+=30)rect(x,104+(x%60)/10,4,1,'#8fc466');
-  {const p1=Bt.legend?Bt.legend.bg[4]:'#7fb85a',p2=Bt.legend?Bt.legend.bg[5]:'#94cc6c';ellipse(178,62,40,8,p1);ellipse(178,61,38,7,p2);ellipse(64,118,46,9,p1);ellipse(64,117,44,8,p2);}
+  {const p1=Bt.raid?'#3a2f4a':Bt.legend?Bt.legend.bg[4]:'#7fb85a',p2=Bt.raid?'#6d5a80':Bt.legend?Bt.legend.bg[5]:'#94cc6c';ellipse(178,62,40,8,p1);ellipse(178,61,38,7,p2);ellipse(64,118,46,9,p1);ellipse(64,117,44,8,p2);}
   // enemy
   if(Bt.legend&&e&&!Bt.hideE){for(let i=0;i<8;i++){const a=frame/18+i*Math.PI/4;rect(178+Math.cos(a)*34,38+Math.sin(a)*22,2,2,i%2?'#ffd23a':'#bfe9ff');}}
   if(e&&!Bt.hideE&&!(Bt.blink.e%6>=3)){ctx.save();ctx.beginPath();ctx.rect(-4,-4,W+8,64);ctx.clip();const bob=(frame>>4)%2;const sc=Bt.scale.e,g=Bt.gs.e,im=g&&g.gmax?GIMG[e.sp]:IMG[e.sp];if(sc>4)giantAura(178,62-6*sc,sc,g&&g.gmax);ctx.drawImage(im,Math.round(178-6*sc+Bt.slideE-(Bt.lunge.e?8:0)),Math.round(64-12*sc+bob+Bt.sink.e),Math.round(12*sc),Math.round(12*sc));ctx.restore();}
   if(Bt.capsule){const c=Bt.capsule;capsule(c.x,c.y,c.wob?((frame>>1)%2?2:-2):0,c.top);if(c.star&&(frame>>3)%2){rect(c.x+3,c.y-6,2,2,'#ffd23a');rect(c.x-4,c.y-2,2,2,'#ffd23a');rect(c.x+10,c.y-2,2,2,'#ffd23a');}}
   // player
   if(p&&!Bt.hideP&&!(Bt.blink.p%6>=3)){ctx.save();ctx.beginPath();ctx.rect(-4,-4,W+8,120);ctx.clip();const sc=Bt.scale.p,g=Bt.gs.p,im=g&&g.gmax?GIMG[p.sp]:IMG[p.sp];if(sc>4)giantAura(64,118-6*sc,sc,g&&g.gmax);const z=Math.round(12*sc);ctx.save();ctx.translate(Math.round(64-6*sc+Bt.slideP+(Bt.lunge.p?8:0))+z,Math.round(118-12*sc+Bt.sink.p));ctx.scale(-1,1);ctx.drawImage(im,0,0,z,z);ctx.restore();ctx.restore();}
+  if(Bt.raid)Bt.raid.allies.forEach((al,i)=>{const ax=4,ay=58+i*30+((frame>>4)+i)%2;ellipse(ax+12,ay+24,10,3,'rgba(0,0,0,.25)');spr(IMG[al.m.sp],ax,ay,2,true);});
   ctx.restore();
+  if(Bt.raid&&e&&!Bt.hideE){const r=Bt.raid;box(6,38,112,15);text(`남은 턴 ${r.left}`,12,40,r.left<=3?'#d9433b':INK,7.5);
+    if(r.sh>0){text('보호막',62,40,'#3f7fe0',7);for(let i=0;i<r.sh;i++){rect(90+i*5,43,4,5,'#3f7fe0');rect(90+i*5,43,4,1,'#bfe0ff');}}else text('★'.repeat(r.R.stars),66,40,'#e6a817',7.5);}
   // info boxes
-  if(e&&!Bt.hideE||Bt.capsule){const st=stats(e);box(6,6,112,30);text(nm(e),12,8,INK,8.5);if(Bt.gs.e){const g=Bt.gs.e;rect(52,9,30,10,g.gmax?'#c0287a':'#e5483f');text((g.gmax?'초거대':'거대')+g.turns,54,8,'#fff',6.5);}text('Lv'+e.lv,86,9,SUB,7.5);if(G.caught[e.sp]&&!Bt.trainer)capsule(76,12);
+  if(e&&!Bt.hideE||Bt.capsule){const st=stats(e);box(6,6,112,30);text(nm(e),12,8,INK,8.5);if(Bt.gs.e){const g=Bt.gs.e;rect(52,9,30,10,g.gmax?'#c0287a':'#e5483f');text(Bt.raid?'레이드':(g.gmax?'초거대':'거대')+g.turns,54,8,'#fff',6.5);}text('Lv'+e.lv,86,9,SUB,7.5);if(G.caught[e.sp]&&!Bt.trainer&&!Bt.gs.e)capsule(76,12);
     text('HP',12,20,'#c77700',7);hpbar(28,23,84,Bt.disp.e,st.hp);}
   if(p&&!Bt.hideP){const st=stats(p);box(124,80,112,42);text(nm(p),130,82,INK,8.5);if(Bt.gs.p){const g=Bt.gs.p;rect(170,83,30,10,g.gmax?'#c0287a':'#e5483f');text((g.gmax?'초거대':'거대')+g.turns,172,82,'#fff',6.5);}text('Lv'+p.lv,204,83,SUB,7.5);
     text('HP',130,94,'#c77700',7);hpbar(146,97,84,Bt.disp.p,st.hp);text(`${Math.ceil(Bt.disp.p)}/${st.hp}`,190,103,SUB,7);
@@ -764,7 +829,7 @@ modes.battle={
 };
 async function battleBag(){Bt.phase='busy';const rows=bagRows(true);if(!rows.length){await msg('가방이 비어 있다!');Bt.phase='menu';return;}
   const i=await listPicker({title:'가방',rows});if(i<0){Bt.phase='menu';return;}const k=rows[i].k,it=ITEMS[k];
-  if(it.use==='ball'){if(Bt.trainer){await msg('다른 트레이너의 몬스터는 잡을 수 없다!');Bt.phase='menu';return;}return doTurn({k:'ball',item:k});}
+  if(it.use==='ball'){if(Bt.raid){await msg('레이드 보스는 쓰러뜨린 다음에 잡을 수 있다!');Bt.phase='menu';return;}if(Bt.trainer){await msg('다른 트레이너의 몬스터는 잡을 수 없다!');Bt.phase='menu';return;}return doTurn({k:'ball',item:k});}
   if(it.use==='jelly'){await msg('배틀 중에는 쓸 수 없다!');Bt.phase='menu';return;}
   const idx=await pickParty({title:`${josa(it.n,'을','를')} 누구에게 쓸까?`});if(idx<0){Bt.phase='menu';return;}
   const pr=itemProblem(k,G.party[idx]);if(pr){await msg(pr);Bt.phase='menu';return;}return doTurn({k:'item',item:k,idx});}
@@ -786,29 +851,37 @@ async function doTurn(a){Bt.phase='busy';const e=Bt.e;
   if(a.giant)await startGiant('p');
   if(Bt.tGiant&&!Bt.eGUsed&&Bt.ti===Bt.team.length-1&&a.k!=='run')await startGiant('e');
   if(a.k==='run'){if(Bt.trainer){await msg('트레이너와의 승부에서는 도망칠 수 없다!');Bt.phase='menu';return;}
+    if(Bt.raid){sfx.back();await msg('둥지에서 빠져나왔다!');await msg(`${josa(nm(e),'은','는')} 여전히 ${Bt.raid.R.name}에서 기다리고 있다...`);return endBattle();}
     Bt.runs++;if(stats(act()).spd>=stats(e).spd||Math.random()<.45+.2*Bt.runs){sfx.back();await msg('무사히 도망쳤다!');if(Bt.legend)await msg(`${josa(nm(e),'은','는')} 여전히 ${Bt.legend.place}에서 기다리고 있다...`);return endBattle();}await msg('도망칠 수 없었다!');}
   else if(a.k==='ball'){if(await throwBall(a.item))return endBattle();}
   else if(a.k==='item'){await applyItem(a.item,G.party[a.idx]);}
   else if(a.k==='switch'){await endGiant('p',true);await msg(`돌아와, ${nm(act())}!`,10);Bt.hideP=true;Bt.pi=a.idx;Bt.disp.p=act().hp;await wait(10);Bt.hideP=false;Bt.slideP=-80;await msg(`가랏! ${nm(act())}!`,14);}
+  const eAtk=async(mid)=>{if(Bt.raid&&Bt.raid.stunAt===Bt.raid.left+1){Bt.raid.stunAt=null;await msg(`${josa(elabel(),'은','는')} 비틀거리며 움직이지 못한다!`,18);return;}await attack(e,act(),mid,false);};
   if(a.k==='move'){const p=act(),ps=stats(p).spd,es=stats(e).spd,pf=ps>es||(ps===es&&Math.random()<.5),em=enemyMove();
-    if(pf){await attack(p,e,a.id,true);if(e.hp>0)await attack(e,p,em,false);}else{await attack(e,p,em,false);if(p.hp>0)await attack(p,e,a.id,true);}}
-  else await attack(e,act(),enemyMove(),false);
+    if(pf){await attack(p,e,a.id,true);if(e.hp>0)await eAtk(em);}else{await eAtk(em);if(p.hp>0)await attack(p,e,a.id,true);}}
+  else await eAtk(enemyMove());
+  if(Bt.raid)for(const al of Bt.raid.allies){if(e.hp<=0)break;await allyAttack(al);}
   if(await checkFaints()==='end')return;
-  for(const k of['p','e'])if(Bt.gs[k]&&--Bt.gs[k].turns<=0)await endGiant(k);
+  for(const k of['p','e'])if(Bt.gs[k]&&!(Bt.raid&&k==='e')&&--Bt.gs[k].turns<=0)await endGiant(k);
+  if(Bt.raid&&--Bt.raid.left<=0){await raidFail();return endBattle();}
+  if(Bt.raid&&Bt.raid.left===3)await msg('폭풍이 거세지고 있다! 남은 턴은 3턴!',20);
   Bt.phase='menu';Bt.cur=0;Bt.arm=false;}
 async function attack(a,d,mid,isP){const mv=Bt.gs[isP?'p':'e']?giantMove(mid,a):MOVES[mid];await msg(`${isP?nm(a):elabel()}의 ${mv.n}!`,14);
   const side=isP?'p':'e',other=isP?'e':'p';Bt.lunge[side]=1;await wait(8);Bt.lunge[side]=0;
   if(Math.random()*100>=mv.a){await msg('그러나 공격은 빗나갔다!',24);return;}
-  const as=stats(a),ds=stats(d),ef=mv.fx==='pierce'?Math.max(1,eff(mv.t,SP[d.sp].t)):eff(mv.t,SP[d.sp].t),stab=mv.t===SP[a.sp].t?1.5:1,crit=Math.random()<1/16?1.5:1;
-  let dmg=Math.floor(((2*a.lv/5+2)*mv.p*as.atk/ds.def)/50+2);dmg=Math.max(1,Math.floor(dmg*stab*ef*crit*(.85+Math.random()*.15)));
+  let{dmg,ef,crit}=calcDmg(a,d,mv);if(Bt.raid&&d===Bt.e)dmg=raidHit(dmg,mv);else if(Bt.raid)dmg=Math.max(1,Math.floor(dmg*.75));
   ef>1?sfx.super():sfx.hit();Bt.blink[other]=24;Bt.shake=ef>1?12:6;d.hp=Math.max(0,d.hp-dmg);
   await waitUntil(()=>Math.abs(Bt.disp[other]-d.hp)<.01&&Bt.blink[other]<=0);
   if(crit>1)await msg('급소에 맞았다!',20);if(ef>1)await msg('효과가 굉장했다!',20);else if(ef<1)await msg('효과가 별로인 듯하다...',20);
-  if(mv.fx==='heal'&&a.hp>0){const mx=stats(a).hp,b=a.hp;a.hp=Math.min(mx,a.hp+Math.floor(mx/6));if(a.hp>b){sfx.heal();await waitUntil(()=>Math.abs(Bt.disp[side]-a.hp)<.01);await msg(`${isP?nm(a):elabel()}의 HP가 회복되었다!`,18);}}}
+  if(mv.fx==='heal'&&a.hp>0){const mx=stats(a).hp,b=a.hp;a.hp=Math.min(mx,a.hp+Math.floor(mx/(Bt.raid&&!isP?18:6)));if(a.hp>b){sfx.heal();await waitUntil(()=>Math.abs(Bt.disp[side]-a.hp)<.01);await msg(`${isP?nm(a):elabel()}의 HP가 회복되었다!`,18);}}
+  if(d===Bt.e)await raidAfterHit();}
+function calcDmg(a,d,mv){const as=stats(a),ds=stats(d),ef=mv.fx==='pierce'?Math.max(1,eff(mv.t,SP[d.sp].t)):eff(mv.t,SP[d.sp].t),stab=mv.t===SP[a.sp].t?1.5:1,crit=Math.random()<1/16?1.5:1;
+  let dmg=Math.floor(((2*a.lv/5+2)*mv.p*as.atk/ds.def)/50+2);dmg=Math.max(1,Math.floor(dmg*stab*ef*crit*(.85+Math.random()*.15)));return{dmg,ef,crit};}
 async function sinkOut(k){await waitUntil(()=>(Bt.sink[k]+=3)>=50);if(k==='e')Bt.hideE=true;else Bt.hideP=true;Bt.sink[k]=0;}
 async function checkFaints(){const e=Bt.e,p=act();
   if(e.hp<=0){sfx.back();await endGiant('e',true);await sinkOut('e');await msg(`${josa(elabel(),'은','는')} 쓰러졌다!`,16);
-    if(p.hp>0)await gainExp(p,Math.floor(SP[e.sp].exp*e.lv/5*(Bt.trainer?1.5:1)));
+    if(p.hp>0)await gainExp(p,Math.floor(SP[e.sp].exp*e.lv/5*(Bt.trainer?1.5:Bt.raid?2.5:1)));
+    if(Bt.raid){await raidWin();if(!G.party.some(m=>m.hp>0)){await msg('싸울 수 있는 몬스터가 없다...');await msg('눈앞이 캄캄해졌다!');await blackout();}else await endBattle();return 'end';}
     if(Bt.trainer&&Bt.ti<Bt.team.length-1){Bt.ti++;Bt.e=Bt.team[Bt.ti];G.seen[Bt.e.sp]=1;Bt.disp.e=Bt.e.hp;Bt.hideE=false;Bt.slideE=130;
       await waitUntil(()=>Bt.slideE===0);await msg(`${josa(Bt.trainer,'은','는')} ${josa(nm(Bt.e),'을','를')} 내보냈다!`,20);return 'ok';}
     if(Bt.trainer){sfx.win();await msg(`${josa(Bt.trainer,'과','와')}의 승부에서 이겼다!`);const prize=Math.max(...Bt.team.map(m=>m.lv))*(Bt.trainer.startsWith('관장')?150:60);G.money+=prize;await msg(`상금으로 ${prize.toLocaleString()}코인을 받았다!`);const before=bridgeOpen();if(Bt.onWin)await Bt.onWin();if(!before&&bridgeOpen()){seq([196,262,330,392],.25,'triangle',.06,.2);await msg('...어디선가 웅장한 울음소리가 울려 퍼졌다!');await msg('반짝 호숫가의 전설의 섬으로 가는 다리가 열린 것 같다!');}}
