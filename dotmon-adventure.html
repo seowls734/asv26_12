@@ -151,8 +151,9 @@ function spr(img,x,y,s=1,flip=false){x=Math.round(x);y=Math.round(y);
   if(flip){ctx.save();ctx.translate(x+img.width*s,y);ctx.scale(-1,1);ctx.drawImage(img,0,0,img.width*s,img.height*s);ctx.restore();}
   else ctx.drawImage(img,x,y,img.width*s,img.height*s);}
 
-const TYPES={'노말':'#9a968c','불꽃':'#ec6a34','물':'#3f87dc','풀':'#4fae4f','전기':'#e3b51a'};
-const CHART={'불꽃':{'풀':2,'물':.5,'불꽃':.5},'물':{'불꽃':2,'풀':.5,'물':.5},'풀':{'물':2,'불꽃':.5,'풀':.5},'전기':{'물':2,'풀':.5,'전기':.5},'노말':{}};
+const TYPES={'노말':'#9a968c','불꽃':'#ec6a34','물':'#3f87dc','풀':'#4fae4f','전기':'#e3b51a','얼음':'#5cc4d8','땅':'#b8864a'};
+const CHART={'불꽃':{'풀':2,'얼음':2,'물':.5,'불꽃':.5},'물':{'불꽃':2,'땅':2,'풀':.5,'물':.5},'풀':{'물':2,'땅':2,'불꽃':.5,'풀':.5},'전기':{'물':2,'풀':.5,'전기':.5,'땅':.5},
+ '얼음':{'풀':2,'땅':2,'불꽃':.5,'물':.5,'얼음':.5},'땅':{'불꽃':2,'전기':2,'풀':.5},'노말':{}};
 const eff=(mt,dt)=>(CHART[mt]&&CHART[mt][dt])||1;
 const MOVES={
   tackle:{n:'몸통박치기',t:'노말',p:40,a:100}, scratch:{n:'할퀴기',t:'노말',p:40,a:100},
@@ -161,7 +162,10 @@ const MOVES={
   bubble:{n:'물방울',t:'물',p:40,a:100}, wave:{n:'물결포',t:'물',p:75,a:90},
   leaf:{n:'잎날리기',t:'풀',p:40,a:100}, blade:{n:'잎사귀칼',t:'풀',p:75,a:90},
   zap:{n:'찌릿',t:'전기',p:40,a:100}, bolt:{n:'번개창',t:'전기',p:75,a:90},
-  starfall:{n:'유성낙하',t:'노말',p:90,a:90}
+  starfall:{n:'유성낙하',t:'노말',p:90,a:90},
+  frost:{n:'서리바람',t:'얼음',p:40,a:100}, icicle:{n:'고드름창',t:'얼음',p:75,a:90},
+  mud:{n:'진흙던지기',t:'땅',p:40,a:100}, quake:{n:'땅울림',t:'땅',p:75,a:90},
+  blizzard:{n:'눈보라',t:'얼음',p:90,a:85}
 };
 const SP={
  fox:{n:'불꼬리',t:'불꽃',hp:45,atk:56,def:42,spd:62,exp:64,rate:.35,learn:[[1,'scratch'],[1,'ember'],[7,'gust'],[11,'blaze']],
@@ -210,9 +214,32 @@ SP.marea={n:'마레아',t:'물',hp:100,atk:84,def:90,spd:70,exp:235,rate:.15,leg
 SP.silva={n:'실바린',t:'풀',hp:95,atk:86,def:86,spd:80,exp:235,rate:.15,legend:true,learn:[[1,'leaf'],[1,'tackle'],[20,'blade'],[26,'gust']],
   d:'고대의 숲 한가운데를 지키는 사슴. 발자국마다 꽃이 피어난다.',pal:{k:'#1a2a12',a:'#8a6440',b:'#f0e0c0',c:'#4fbf4a',w:'#ffd23a'},
   px:["c.c.........","cwc.c.......",".ccwc.......","..ckk.......",".kaaak......","kkakak......",".kaaakkwkkk.","..kaabbbbaak","..kaaaaaaaak","...kakkkkak.","...kak..kak.","...kk...kk.."]};
-const ORDER=['fox','seal','bunny','bird','shroom','fly','jelly','crab','astra','marea','silva','ignis'];
-const BASE8=ORDER.filter(k=>!SP[k].legend);
-const GNAME={'노말':'거대 충격','불꽃':'거대 화염','물':'거대 해일','풀':'거대 수풀','전기':'거대 번개'};
+/* --- 서리 고원 · 수정 동굴의 몬스터 --- */
+SP.snowy={n:'눈뭉치',t:'얼음',hp:46,atk:44,def:52,spd:40,exp:54,rate:.7,learn:[[1,'tackle'],[1,'frost'],[12,'scratch'],[16,'icicle']],
+  d:'눈 위를 데굴데굴 굴러다니며 몸집을 키운다. 털모자는 태어날 때부터 쓰고 있다.',pal:{k:'#2a3a4a',a:'#ffffff',b:'#cfe8f5',c:'#7a4a2a',r:'#e5483f'},
+  px:["....rrrr....","...rrrrrr...","..kkkkkkkk..",".kaaaaaaaak.",".kakaaaakak.","ckaaaaaaaakc",".ckaabbaakc.","..kaaaaaak..",".kaaaaaaaak.",".kabaaaabak.",".kbbaaaabbk.","..kkkkkkkk.."]};
+SP.pengu={n:'펭글',t:'얼음',hp:52,atk:50,def:48,spd:44,exp:60,rate:.55,learn:[[1,'peck'],[1,'frost'],[10,'bubble'],[15,'icicle'],[19,'wave']],
+  d:'머리의 얼음 깃털로 바람의 온도를 잰다. 배로 얼음 위를 미끄러지는 게 특기.',pal:{k:'#1a2230',a:'#4a5a70',b:'#ffffff',c:'#ffa63a',w:'#9fe8ff'},
+  px:["....w..w....",".....ww.....","...kkkkkk...","..kaaaaaak..","..kakaakak..","..kaaccaak..",".kaabbbbaak.","kaabbbbbbaak","kaabbbbbbaak",".kabbbbbbak.","..kbbbbbbk..","..cc....cc.."]};
+SP.moth={n:'서리나방',t:'얼음',hp:40,atk:54,def:38,spd:70,exp:58,rate:.55,learn:[[1,'gust'],[1,'frost'],[14,'zap'],[17,'icicle']],
+  d:'날갯짓할 때마다 반짝이는 서리 가루가 흩날린다. 따뜻한 곳에선 기운이 없다.',pal:{k:'#2a2a4a',a:'#e8f4ff',b:'#9fd0f0',c:'#5a6aa0'},
+  px:["..k......k..","...k....k...","aa..kkkk..aa","aaa.kcck.aaa","abba.kk.abba","abbaakkaabba","aaaa.kk.aaaa",".aa.kcck.aa.","aba.kcck.aba","abba.kk.abba",".aa..kk..aa.","............"]};
+SP.mole={n:'흙두더',t:'땅',hp:55,atk:60,def:50,spd:38,exp:62,rate:.55,learn:[[1,'scratch'],[1,'mud'],[12,'tackle'],[16,'quake']],
+  d:'머리의 빛나는 버섯으로 어두운 동굴을 밝히며 굴을 판다. 커다란 앞발이 자랑.',pal:{k:'#2a1a10',a:'#8a5a34',b:'#d8b088',c:'#ff9db0',w:'#ffd23a'},
+  px:["....kwwk....","...kkwwkk...","..kaaaaaak..",".kaaaaaaaak.",".kakaaaakak.",".kaaacaaaak.","kbkabbbbakbk","kbbkbbbbkbbk",".kbkaaaakbk.","..kaaaaaak..","..kaakkaak..","..kkk..kkk.."]};
+SP.turtle={n:'수정등이',t:'땅',hp:65,atk:48,def:72,spd:26,exp:70,rate:.45,learn:[[1,'tackle'],[1,'mud'],[13,'frost'],[18,'quake']],
+  d:'등딱지에 자라는 수정은 백 년에 한 마디씩 자란다. 아주 느긋한 성격.',pal:{k:'#1a2a2a',a:'#6a8a5a',b:'#7a6a8a',c:'#b8f0ff',w:'#ffffff'},
+  px:["....c..c....","...cwc.cc...","..kcckkcck..",".kbbbbbbbbk.","kbbcbbbbcbbk","kbbbbccbbbkk","kkkkkkkkkaak",".kaak..kaawk",".kaak..kaaak",".kkk...kkkk.","............","............"]};
+SP.lizard={n:'모래도마',t:'땅',hp:48,atk:62,def:44,spd:64,exp:60,rate:.55,learn:[[1,'scratch'],[1,'mud'],[11,'tackle'],[17,'quake']],
+  d:'모래 속에 몸을 숨기고 꼬리만 내민 채 먹이를 기다린다. 혀가 아주 빠르다.',pal:{k:'#3a2a10',a:'#e0b860',b:'#b07a30',c:'#ff6b3a'},
+  px:["............","......kkkk..",".....kaaaak.",".....kakaak.","....kaaaaaac","...kaabbaak.","..kaabbbbk..",".kaabbaak...","kak.kaaak...","kak.kakak...",".kaak.k.k...","..kk........"]};
+SP.frosta={n:'설령',t:'얼음',hp:95,atk:90,def:84,spd:88,exp:240,rate:.15,legend:true,learn:[[1,'frost'],[1,'gust'],[24,'icicle'],[30,'blizzard']],
+  d:'수정 동굴 가장 깊은 곳에서 고원의 눈을 다스리는 올빼미 정령. 날개를 펴면 눈보라가 친다.',pal:{k:'#10203a',a:'#e8f6ff',b:'#8fd8ff',c:'#4a7ad8',w:'#ffd23a'},
+  px:["..k......k..","..kk....kk..","..kakkkkak..",".kaaaaaaaak.",".kawkaakwak.",".kaaaabaaak.","bkaaabbaaakb","bbkaaaaaakbb","cbbkaaaakbbc",".cbbkaakbbc.","..cbkkkkbc..","...c.cc.c..."]};
+const FROST6=['snowy','pengu','moth','mole','turtle','lizard'];
+const ORDER=['fox','seal','bunny','bird','shroom','fly','jelly','crab',...FROST6,'astra','marea','silva','ignis','frosta'];
+const BASE8=['fox','seal','bunny','bird','shroom','fly','jelly','crab'];
+const GNAME={'노말':'거대 충격','불꽃':'거대 화염','물':'거대 해일','풀':'거대 수풀','전기':'거대 번개','얼음':'거대 빙하','땅':'거대 지진'};
 const gpow=p=>p<=45?90:p<=60?110:130;
 const GMAX={
  fox:{n:'초거대 불꽃꼬리',t:'불꽃',p:140,fx:'pierce',d:'상대가 불꽃에 강해도 제대로 들어간다',pal:{a:'#ff4a24',b:'#fff6dc',c:'#fff27a'}},
@@ -269,7 +296,17 @@ TL['r']=mkTile(f=>{grassBase(f);f(3,3,10,11,'#3e4350');f(2,5,12,8,'#3e4350');f(3
 TL['b']=mkTile(f=>{f(0,0,16,16,C.water);f(2,0,12,16,'#5a341c');f(3,0,10,16,'#a8743f');for(let y=1;y<16;y+=4)f(3,y,10,1,'#7a4a2a');f(2,0,1,16,'#3a2010');f(13,0,1,16,'#3a2010');});
 TL['S']=mkTile(f=>{grassBase(f);f(7,9,2,6,C.trunk);f(2,2,12,8,'#20203a');f(3,3,10,6,'#c9944f');f(4,5,8,1,'#8a5f2e');f(4,7,6,1,'#8a5f2e');});
 
-const MW=104,MH=70;
+const snowBase=f=>{f(0,0,16,16,'#eef4fb');for(const[x,y]of[[3,4],[11,2],[7,11],[13,13],[2,13],[9,7]])f(x,y,1,1,'#cfdcec');};
+TL['n']=mkTile(snowBase);
+TL['N']=[0,1].map(fr=>mkTile(f=>{snowBase(f);for(const[x,y]of[[0,1],[8,1],[4,9],[12,9]]){f(x+1,y+2,1,5,'#6f93a8');f(x+3,y,1,7,'#6f93a8');f(x+5,y+2,1,5,'#6f93a8');f(x+1,y+6,5,1,'#8fb0c4');f(x+3,y,1,1,'#ffffff');f(x+1+fr,y+2,1,1,'#ffffff');}}));
+TL['Y']=mkTile(f=>{snowBase(f);f(7,12,2,3,C.trunk);f(6,1,4,3,'#1f5a3a');f(4,4,8,4,'#1f5a3a');f(2,8,12,4,'#1f5a3a');f(6,1,4,1,'#ffffff');f(4,4,8,1,'#ffffff');f(2,8,12,1,'#ffffff');f(5,9,2,1,'#ffffff');f(10,5,1,1,'#ffffff');f(4,15,8,1,'#cfdcec');});
+TL['I']=mkTile(f=>{f(0,0,16,16,'#bfe6f5');f(2,3,6,1,'#ffffff');f(9,9,5,1,'#ffffff');f(4,12,3,1,'#9fd0e8');f(11,4,2,1,'#9fd0e8');f(1,7,1,1,'#ffffff');});
+const caveBase=f=>{f(0,0,16,16,'#4a4058');for(const[x,y]of[[3,4],[11,2],[7,11],[13,13],[2,13],[9,7]])f(x,y,2,1,'#3a3248');};
+TL['c']=mkTile(caveBase);
+TL['x']=[0,1].map(fr=>mkTile(f=>{caveBase(f);for(const[x,y,c]of[[2,6,'#9fe8ff'],[9,2,'#c8a0ff'],[10,10,'#9fe8ff'],[4,12,'#c8a0ff']]){f(x+1,y,2,4,c);f(x,y+2,1,2,c);f(x+3,y+1,1,3,c);f(x+1,y,1,1,'#ffffff');}if(fr)f(11,3,1,1,'#ffffff');else f(3,7,1,1,'#ffffff');}));
+TL['X']=mkTile(f=>{f(0,0,16,16,'#2a2236');f(1,1,6,5,'#3e3450');f(9,2,6,6,'#3e3450');f(2,9,7,6,'#3e3450');f(11,10,4,5,'#3e3450');f(1,1,6,1,'#5a4c70');f(9,2,6,1,'#5a4c70');f(2,9,7,1,'#5a4c70');f(12,4,1,2,'#7fd8ff');});
+TL['Sn']=mkTile(f=>{snowBase(f);f(7,9,2,6,C.trunk);f(2,2,12,8,'#20203a');f(3,3,10,6,'#c9944f');f(4,5,8,1,'#8a5f2e');f(4,7,6,1,'#8a5f2e');f(2,1,12,1,'#ffffff');});
+const MW=104,MH=96;
 const MAP=[];for(let y=0;y<MH;y++)MAP.push(Array(MW).fill('.'));
 const fill=(x0,y0,x1,y1,c)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)MAP[y][x]=c;};
 const put=(list,c)=>{for(const[x,y]of list)MAP[y][x]=c;};
@@ -320,17 +357,31 @@ for(let x=64;x<=102;x++)MAP[45][x]='T';
 fill(64,46,102,55,'s');fill(70,47,78,52,',');fill(82,47,88,51,',');fill(93,47,101,53,',');
 fill(64,56,102,68,'~');fill(90,56,90,58,'s');fill(90,58,95,58,'s');fill(95,59,95,61,'s');fill(94,62,98,64,'s');
 put([[88,57],[93,60],[99,59],[92,64],[100,65],[86,62],[97,67]],'r');
+/* --- 최남단: 서리 고원 · 눈꽃 마을 · 수정 동굴 (y70~94) --- */
+for(let x=0;x<MW;x++)MAP[69][x]='T';
+fill(1,70,62,94,'n');
+fill(3,71,26,80,'N');fill(3,84,28,93,'N');fill(32,79,56,93,'N');fill(10,74,16,77,'I');
+fill(35,83,47,90,'I');fill(37,85,45,88,'~');
+put([[2,70],[27,71],[28,74],[6,82],[24,86],[30,84],[29,92],[50,80],[56,84],[58,92],[61,78],[3,93],[20,72],[8,90],[52,88],[33,90],[57,72],[29,77]],'Y');
+bld(36,40,71,'R','W',38,'D');bld(44,46,71,'G','W',45,'m');bld(50,53,71,'H','W',51,'h');
+fill(42,67,42,75,'=');fill(30,75,60,75,'=');put([[38,74],[45,74],[51,74]],'=');fill(60,75,60,88,'=');fill(60,88,63,88,'=');
+fill(64,70,102,94,'X');
+fill(64,86,74,90,'c');fill(70,72,72,85,'c');fill(70,72,90,74,'x');fill(88,72,90,92,'c');fill(74,90,100,92,'x');
+fill(76,78,86,84,'x');fill(72,80,76,80,'c');fill(86,80,88,80,'c');fill(93,78,101,88,'c');fill(90,83,93,83,'c');fill(97,88,97,90,'c');
+put([[78,80],[84,82],[95,80],[99,86]],'X');
 for(let x=0;x<MW;x++){MAP[0][x]='T';MAP[MH-1][x]='T';}
 for(let y=0;y<MH;y++){MAP[y][0]='T';MAP[y][MW-1]='T';}
 fill(2,11,61,11,'=');fill(7,6,7,10,'=');fill(24,6,24,10,'=');fill(15,8,15,10,'=');fill(19,12,19,27,'=');fill(4,27,58,27,'=');fill(32,28,32,55,'=');fill(3,55,90,55,'=');fill(62,11,84,11,'=');fill(84,10,84,10,'V');fill(66,11,66,55,'=');fill(66,33,79,33,'=');
 fill(3,60,23,60,'=');fill(3,66,23,66,'=');fill(14,56,14,66,'=');fill(36,60,61,60,'=');fill(36,66,61,66,'=');fill(42,56,42,66,'=');fill(56,56,56,59,'=');fill(48,61,48,66,'=');
 fill(2,3,4,4,'G');fill(2,5,4,5,'W');MAP[5][3]='m';fill(3,6,3,10,'=');
+for(let x=1;x<MW-1;x++)MAP[69][x]=x===42?'=':'T';for(let y=70;y<MH-1;y++)MAP[y][63]=y===88?'=':'T';
+put([[43,68],[41,76],[62,87]],'S');
 fill(5,3,9,4,'R');fill(5,5,9,5,'W');MAP[5][7]='D';
 fill(21,2,27,4,'B');fill(21,5,27,5,'w');MAP[5][24]='d';
 fill(50,3,54,4,'R');fill(50,5,54,5,'W');MAP[5][52]='D';fill(52,6,52,10,'=');
 fill(57,3,59,4,'G');fill(57,5,59,5,'W');MAP[5][58]='m';fill(58,6,58,10,'=');
 put([[5,7],[9,6],[26,6],[17,12],[33,12],[49,7],[20,25],[18,31],[33,46],[15,56],[41,56],[47,59],[62,10],[65,12],[65,34],[65,52]],'S');
-const SIGNS={'62,10':'→ 전설의 땅\n불꽃 산 · 고대의 숲 · 심해 해안  (Lv.18~24)','65,12':'불꽃 산\n정상의 용암 고리 한가운데에 불새가 잠들어 있다고 한다.','65,34':'고대의 숲\n숲 한가운데 꽃의 공터는 전설의 사슴이 머무는 곳.','65,52':'심해 해안\n바다 위 돌길 끝, 해룡의 제단이 있다.','33,46':'↓ 모래 언덕길\n← 노을 마을 · 별빛 도시 →  야생 몬스터 Lv.14~18','15,56':'노을 마을\n바다 내음 가득한, 저녁노을이 고운 마을','41,56':'별빛 도시\n밤하늘이 가장 아름다운 도시','47,59':'별빛 체육관 · 관장 하늘\n풀과 전기의 달인 · 추천 레벨 18 이상','18,31':()=>bridgeOpen()?'전설의 섬\n다리가 열렸다. 섬에서 신비로운 기운이 느껴진다...':`전설의 섬 · 출입 금지\n도트 배지와 북부 트레이너 8명 전원 승리 시 다리가 열린다. (현재 ${MAIN_T().filter(t=>G.beaten[t.id]).length}/8명${G.badge?' · 배지 있음':''})`,'33,12':'→ 동쪽: 산들 마을\n↑ 솔바람 숲 Lv.8~11   ↓ 바위 들판 Lv.10~13','49,7':'산들 마을\n바람이 머무는 작은 마을. 센터와 상점이 있다.','20,25':'↓ 반짝 호숫가 · 갈대 벌판\n야생 몬스터 Lv.12~15 (고수 전용)','5,7':'도트 상점\n캡슐 · 회복약 · 특별한 도구 판매','9,6':'도트몬 센터\n몬스터 회복 · 캡슐 보충 · 보관함','26,6':'도트 체육관 · 관장 도윤\n추천 레벨: 10 이상','17,12':'← 서쪽 풀숲 Lv.3~6   동쪽 풀숲 Lv.6~9 →\n↑ 북쪽 풀숲 Lv.2~4   ↓ 남쪽 호숫가'};
+const SIGNS={'43,68':'↓ 서리 고원 · 눈꽃 마을\n야생 몬스터 Lv.22~26  (별빛 배지 추천)','41,76':'눈꽃 마을\n눈이 그치지 않는 고원의 작은 마을. 동쪽 끝에 수정 동굴이 있다.','62,87':'→ 수정 동굴\n야생 몬스터 Lv.24~28 · 가장 깊은 곳에 얼음 정령이 산다고 한다.','62,10':'→ 전설의 땅\n불꽃 산 · 고대의 숲 · 심해 해안  (Lv.18~24)','65,12':'불꽃 산\n정상의 용암 고리 한가운데에 불새가 잠들어 있다고 한다.','65,34':'고대의 숲\n숲 한가운데 꽃의 공터는 전설의 사슴이 머무는 곳.','65,52':'심해 해안\n바다 위 돌길 끝, 해룡의 제단이 있다.','33,46':'↓ 모래 언덕길\n← 노을 마을 · 별빛 도시 →  야생 몬스터 Lv.14~18','15,56':'노을 마을\n바다 내음 가득한, 저녁노을이 고운 마을','41,56':'별빛 도시\n밤하늘이 가장 아름다운 도시','47,59':'별빛 체육관 · 관장 하늘\n풀과 전기의 달인 · 추천 레벨 18 이상','18,31':()=>bridgeOpen()?'전설의 섬\n다리가 열렸다. 섬에서 신비로운 기운이 느껴진다...':`전설의 섬 · 출입 금지\n도트 배지와 북부 트레이너 8명 전원 승리 시 다리가 열린다. (현재 ${MAIN_T().filter(t=>G.beaten[t.id]).length}/8명${G.badge?' · 배지 있음':''})`,'33,12':'→ 동쪽: 산들 마을\n↑ 솔바람 숲 Lv.8~11   ↓ 바위 들판 Lv.10~13','49,7':'산들 마을\n바람이 머무는 작은 마을. 센터와 상점이 있다.','20,25':'↓ 반짝 호숫가 · 갈대 벌판\n야생 몬스터 Lv.12~15 (고수 전용)','5,7':'도트 상점\n캡슐 · 회복약 · 특별한 도구 판매','9,6':'도트몬 센터\n몬스터 회복 · 캡슐 보충 · 보관함','26,6':'도트 체육관 · 관장 도윤\n추천 레벨: 10 이상','17,12':'← 서쪽 풀숲 Lv.3~6   동쪽 풀숲 Lv.6~9 →\n↑ 북쪽 풀숲 Lv.2~4   ↓ 남쪽 호숫가'};
 const TRAINERS=[
  {id:'seoyeon',name:'꼬마 서연',x:4,y:12,dir:'up',pal:{c:'#ff8fb1',a:'#ffffff',h:'#2a1a12'},team:[['bird',4],['shroom',4]],hello:'눈이 마주쳤으니 승부야! 내 몬스터 귀엽지?',lose:'우와, 너 정말 강하다!',after:'풀숲 안쪽엔 해파링도 산대.'},
  {id:'jiho',name:'곤충소년 지호',x:14,y:5,dir:'down',pal:{c:'#3aa04a',a:'#e6c229',h:'#3a2a10'},team:[['fly',3],['fly',4],['fly',4]],hello:'반딧벌의 찌릿찌릿 맛 좀 볼래?',lose:'내 반딧벌들이 전부 지다니...',after:'전기 기술은 물 타입에게 효과가 굉장해.'},
@@ -344,7 +395,10 @@ const TRAINERS=[
 for(const t of TRAINERS)t.img=PL[t.dir==='left'?'right':t.dir].map(p=>buildImg(p,Object.assign({},PPAL,t.pal)))[0];
 TRAINERS.push(
  {id:'dohyeon',extra:true,name:'모험가 도현',x:10,y:54,dir:'down',pal:{c:'#d2691e',a:'#2e8b57',h:'#1a1a1a'},team:[['seal',15],['fox',15],['shroom',16]],hello:'모래 언덕을 넘어온 트레이너군! 실력 좀 보자!',lose:'모래바람보다 매서운걸!',after:'노을 마을 어부 아저씨 집에 가 봐. 좋은 걸 주실 거야.'},
- {id:'sua',extra:true,giant:true,name:'엘리트 수아',x:48,y:54,dir:'down',pal:{c:'#ffffff',a:'#1f2a5a',h:'#c9a227'},team:[['jelly',16],['crab',17],['bird',17],['fly',18]],hello:'별빛 도시에 들어가려면 내 시험을 통과해야 해!',lose:'합격이야. 별빛 체육관에서 기다릴게.',after:'관장 하늘님은 불꽃 타입에 약한 몬스터가 많아.'});
+ {id:'sua',extra:true,giant:true,name:'엘리트 수아',x:48,y:54,dir:'down',pal:{c:'#ffffff',a:'#1f2a5a',h:'#c9a227'},team:[['jelly',16],['crab',17],['bird',17],['fly',18]],hello:'별빛 도시에 들어가려면 내 시험을 통과해야 해!',lose:'합격이야. 별빛 체육관에서 기다릴게.',after:'관장 하늘님은 불꽃 타입에 약한 몬스터가 많아.'},
+ {id:'yujin',extra:true,name:'스키어 유진',x:12,y:82,dir:'right',pal:{c:'#e04848',a:'#ffffff',h:'#2a1a12'},team:[['snowy',23],['pengu',24],['moth',24]],hello:'눈밭에선 내가 제일 빨라! 승부다!',lose:'으앗, 눈밭에서 미끄러졌어...',after:'얼음 타입은 불꽃 기술에 약해. 대신 풀이랑 땅 타입엔 강하지!'},
+ {id:'cheolmin',extra:true,name:'광부 철민',x:68,y:86,dir:'down',pal:{c:'#e6c229',a:'#5a4a3a',h:'#222222'},team:[['mole',25],['lizard',25],['turtle',26]],hello:'수정 캐러 왔다가 트레이너를 캐냈군! 덤벼라!',lose:'허허, 곡괭이보다 단단한 녀석이로구먼.',after:'땅 타입엔 물이나 풀 기술이 잘 통하지. 전기는 영 안 먹혀.'},
+ {id:'sea',extra:true,giant:true,name:'얼음 탐험가 세아',x:89,y:84,dir:'up',pal:{c:'#9fe8ff',a:'#3a4a8a',h:'#f0f0f0'},team:[['moth',26],['turtle',27],['pengu',27],['lizard',28]],hello:'동굴 깊은 곳의 정령을 만나려면 내 실력부터 넘어 봐!',lose:'대단해... 정령도 너를 인정할 거야.',after:'고원과 동굴의 몬스터 6종을 모두 잡으면 가장 깊은 방에 설령이 나타난대.'});
 const MAIN_T=()=>TRAINERS.filter(t=>!t.extra);
 const VILLAGERS=[
  {name:'마을 아저씨',x:11,y:8,dir:'down',pal:{c:'#6b8e23',a:'#d9c27a',h:'#555'},lines:['도윤 관장은 마지막에 퐁당이를 내보내지. 풀이나 전기 기술로 맞서 봐!']},
@@ -354,6 +408,8 @@ const VILLAGERS=[
  {name:'노을 마을 소녀',x:12,y:64,dir:'left',pal:{c:'#ff8fb1',a:'#ffffff',h:'#5a3a22'},lines:['도감을 다 채우면 무슨 일이 일어날까? 궁금해!']},
  {name:'별빛 시장님',x:40,y:61,dir:'down',pal:{c:'#222',a:'#3a3a6a',h:'#999'},lines:['별빛 도시에 어서 오게. 이 도시엔 두 번째 체육관이 있지.','관장 하늘을 이기면 별빛 배지를 받을 수 있다네.']},
  {name:'연구원',x:47,y:61,dir:'right',pal:{c:'#ffffff',a:'#e8e8f0',h:'#3a3a3a'},lines:['거대화는 3턴 동안만 유지돼. 상대가 거대화하면 교체로 버티는 것도 방법이야.','곳곳의 돌무더기에서 빛기둥이 솟는 걸 봤어? 레이드 둥지야! 지원 트레이너들과 10턴 안에 거대 보스를 쓰러뜨리면 잡을 기회가 생겨.','심해 해안 모래밭엔 황금빛 전설의 둥지가 있대. 전설의 몬스터를 동료로 맞이한 트레이너에게만 반응한다나 봐.','초거대화 기술은 타입이 같을 때만 전용 기술로 바뀌지.']},
+ {name:'눈꽃 할머니',x:34,y:76,dir:'down',pal:{c:'#c0392b',a:'#f0e0c0',h:'#eee'},lines:['눈꽃 마을에 잘 왔다. 손이 꽁꽁 얼었구나.','깊은 눈밭에선 눈뭉치와 펭글이, 동굴 수정밭에선 흙두더와 수정등이가 나온단다.']},
+ {name:'얼음낚시꾼',x:48,y:77,dir:'left',pal:{c:'#2f5fa8',a:'#7a8f3a',h:'#555'},lines:['남쪽 얼음 호수에서 낚시 중이야. 오늘도 꽝이지만!','서쪽 돌무더기 둥지에서 빛기둥이 솟는 걸 봤어. 아주 강한 녀석이 있을 거야.']},
  {name:'별빛 소년',x:58,y:67,dir:'up',pal:{c:'#3aa04a',a:'#e6c229',h:'#3a2a10'},lines:['밤마다 하늘에서 아스트라가 보인대! 진짜일까?','그리고 동쪽 고대의 숲 깊은 곳엔 도감 8종을 모두 채운 사람만 만날 수 있는 사슴이 산대!']}
 ];
 const HOUSES={
@@ -363,6 +419,7 @@ const HOUSES={
  '58,59':{t:'천문학자: 별을 보다 보면 거대화 에너지가 느껴져. 이걸로 강한 몬스터를 잡아 봐!',gift:['superball',3]},
  '38,65':{t:'"별빛 도시 야경 봤어? 밤이 되면 도시 전체가 반짝여!"'},
  '45,65':{t:'약사 언니: 트레이너라면 부활초는 필수지! 두 개 챙겨 줄게.',gift:['revive',2]},
+ '51,73':{t:'산악 구조대원: 이 추위에 여기까지 오다니! 몸 녹이는 데 이게 최고야.',gift:['superpotion',3]},
  '55,65':{t:'"관장 하늘님은 마지막에 새순이를 초거대화시킨대. 불꽃 타입으로 맞서 봐!"'}
 };
 const npcAt=(x,y)=>TRAINERS.find(t=>t.x===x&&t.y===y)||VILLAGERS.find(t=>t.x===x&&t.y===y);
@@ -378,14 +435,18 @@ const LEGENDS=[
   near:'...주위에 꽃잎이 흩날린다. 숲 전체가 숨을 죽였다.',roar:'끼이이이잉──!',appear:'꽃잎 폭풍 속에서 전설의 사슴 실바린이 걸어 나왔다!',gone:'꽃잎이 되어 숲속으로 흩어졌다'},
  {sp:'ignis',x:84,y:4,lv:35,cond:()=>!!(G&&G.badge&&G.badge2&&G.lc&&G.lc.astra),place:'불꽃 산 정상',spark:'#ffb03a',cry:[330,392,494,587,784,988],bg:['#3a0f12','#5a1a16','#7a2a18','#a8461e','#8a3a1e','#c8642e'],
   unlock:'...하늘이 붉게 타오른다! 동쪽 전설의 땅, 불꽃 산 정상에서 불새의 울음소리가 들려왔다.',
-  near:'...뜨거운 바람이 몰아친다. 바위들이 붉게 달아오른다.',roar:'키야아아아악──!',appear:'불꽃 기둥을 뚫고 전설의 불새 이그나가 날아올랐다!',gone:'불꽃이 되어 하늘 높이 날아갔다'}
+  near:'...뜨거운 바람이 몰아친다. 바위들이 붉게 달아오른다.',roar:'키야아아아악──!',appear:'불꽃 기둥을 뚫고 전설의 불새 이그나가 날아올랐다!',gone:'불꽃이 되어 하늘 높이 날아갔다'},
+ {sp:'frosta',x:97,y:82,lv:36,cond:()=>!!(G&&FROST6.every(k=>G.caught[k])),place:'수정 동굴 가장 깊은 방',spark:'#bfefff',cry:[880,784,659,880,1046,1318],bg:['#0e1a33','#142748','#1c3a64','#2a5280','#3a6a9a','#8fc8e8'],
+  unlock:'...발밑에서 찬 기운이 올라온다! 최남단 수정 동굴 깊은 곳에서 눈보라 소리가 들려왔다.',
+  near:'...숨이 하얗게 얼어붙는다. 수정들이 일제히 빛나기 시작했다.',roar:'후우우우우웅──!',appear:'눈보라를 가르며 얼음의 정령 설령이 날개를 펼쳤다!',gone:'눈송이가 되어 동굴 속으로 흩어졌다'}
 ];
 const RAIDS=[
  {id:'r1',name:'호숫가 둥지',x:26,y:25,lv:16,stars:1,pool:['fox','crab','jelly','bird'],color:'#ff6b8a'},
  {id:'r2',name:'바위 들판 둥지',x:58,y:23,lv:20,stars:2,pool:['seal','bunny','shroom','fly'],color:'#ffb03a'},
  {id:'r3',name:'모래 언덕 둥지',x:30,y:52,lv:25,stars:3,pool:['fox','seal','bunny','crab','jelly'],color:'#c86bff'},
  {id:'r4',name:'심해 해안 둥지',x:100,y:47,lv:30,stars:4,pool:['fox','seal','bunny','bird','shroom','fly','jelly','crab'],color:'#4ad8ff'},
- {id:'r5',name:'전설의 둥지',x:80,y:48,lv:38,stars:5,legend:true,turns:12,pool:[],color:'#ffd23a'}
+ {id:'r5',name:'전설의 둥지',x:80,y:48,lv:38,stars:5,legend:true,turns:12,pool:[],color:'#ffd23a'},
+ {id:'r6',name:'서리 고원 둥지',x:20,y:82,lv:33,stars:4,pool:FROST6,color:'#9fe8ff'}
 ];
 const raidPool=R=>R.legend?LEGENDS.map(L=>L.sp).filter(k=>G&&G.lc[k]):R.pool;
 const denAt=(x,y)=>RAIDS.find(R=>R.x===x&&R.y===y);
@@ -393,7 +454,7 @@ const denOn=R=>!!(G&&G.badge&&!G.rd[R.id]&&raidPool(R).length);
 const legendHere=L=>!!(G&&L.cond()&&!G.lc[L.sp]&&!G.lg[L.sp]);
 const legendAt=(x,y)=>LEGENDS.find(L=>L.x===x&&L.y===y&&legendHere(L));
 const tileAt=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?'T':(x===16&&y>=32&&y<=34&&bridgeOpen())?'b':MAP[y][x];
-const walkable=t=>t==='.'||t===','||t==='='||t==='*'||t==='s'||t==='b'||t==='V'||t==='A';
+const walkable=t=>t==='.'||t===','||t==='='||t==='*'||t==='s'||t==='b'||t==='V'||t==='A'||t==='n'||t==='N'||t==='I'||t==='c'||t==='x';
 
 /* ================= state ================= */
 let G=null;
@@ -528,7 +589,7 @@ modes.world={lock:false,cool:0,lastBump:0,enter(){this.lock=false;},
   else if(frame-this.lastBump>16){sfx.bump();this.lastBump=frame;}},
  onStep(){const T0=tileAt(P.x,P.y);if(T0==='A'&&Math.random()<.11){encounter();return true;}const rg=regionName(P.x,P.y);if(rg!==this.region){if(this.region)this.toast=110;this.region=rg;}
   for(const tr of TRAINERS){if(G.beaten[tr.id])continue;const[dx,dy]=DV[tr.dir];for(let i=1;i<=4;i++){const x=tr.x+dx*i,y=tr.y+dy*i;if(x===P.x&&y===P.y){trainerSpot(tr,true);return true;}if(!walkable(tileAt(x,y))||npcAt(x,y))break;}}
-  if(tileAt(P.x,P.y)===','&&Math.random()<.11){encounter();return true;}return false;},
+  {const T1=tileAt(P.x,P.y);if((T1===','||T1==='N'||T1==='x')&&Math.random()<.11){encounter();return true;}}return false;},
  async interact(x,y){const t=tileAt(x,y),tr=npcAt(x,y);
   {const L=legendAt(x,y);if(L){this.lock=true;await legendEvent(L);return;}}
   {const R=denAt(x,y);if(R){this.lock=true;const st=await denEvent(R);if(!st){this.lock=false;this.cool=20;}return;}}
@@ -543,7 +604,7 @@ modes.world={lock:false,cool:0,lastBump:0,enter(){this.lock=false;},
  draw(){const rx=P.moving?P.x+(P.tx-P.x)*P.t/8:P.x,ry=P.moving?P.y+(P.ty-P.y)*P.t/8:P.y;
   const cx=clamp(Math.round(rx*16+8-W/2),0,MW*16-W),cy=clamp(Math.round(ry*16+8-H/2),0,MH*16-H);
   const x0=Math.floor(cx/16),y0=Math.floor(cy/16),wf=(frame>>5)%2,gf=(frame>>4)%2;
-  for(let y=y0;y<=y0+11;y++)for(let x=x0;x<=x0+15;x++){const t=tileAt(x,y);let im=TL[t];if(Array.isArray(im))im=im[t==='~'?wf:gf];ctx.drawImage(im,x*16-cx,y*16-cy);}
+  for(let y=y0;y<=y0+11;y++)for(let x=x0;x<=x0+15;x++){const t=tileAt(x,y);let im=TL[t==='S'&&y>=70?'Sn':t];if(Array.isArray(im))im=im[t==='~'?wf:gf];ctx.drawImage(im,x*16-cx,y*16-cy);}
   // building emblems
   for(let y=y0;y<=y0+13;y++)for(let x=x0-1;x<=x0+16;x++){const t=tileAt(x,y),sx=x*16-cx,sy=(y-2)*16-cy;
     if(t==='D'){rect(sx+5,sy+6,6,18,'#ffffff');rect(sx-1,sy+12,18,6,'#ffffff');}
@@ -664,9 +725,10 @@ async function trainerSpot(tr,seen){const w=modes.world;w.lock=true;
   if(seen){tr.alert=36;beep(1200,.08);beep(1500,.1,'square',.04,.08);await wait(36);tr.dir=P.x>tr.x?'right':P.x<tr.x?'left':P.y>tr.y?'down':'up';P.dir={up:'down',down:'up',left:'right',right:'left'}[tr.dir];}
   await msg(`${tr.name}: ${tr.hello}`);
   startBattle({trainer:tr.name,giant:!!tr.giant,team:tr.team.map(([s,l])=>mkMon(s,l)),onWin:async()=>{G.beaten[tr.id]=1;await msg(`${tr.name}: ${tr.lose}`);}});}
-function regionName(x,y){if(x>=63)return y<=21?'불꽃 산':y<=45?'고대의 숲':'심해 해안';if(y>=46){if(y<=55)return '모래 언덕길';return x<30?'노을 마을':'별빛 도시';}if(y>=24)return x>=32?'갈대 벌판':'반짝 호숫가';if(x>=48&&y<=10)return '산들 마을';if(x>=32)return y<11?'솔바람 숲':'바위 들판';return '도트 마을';}
+function regionName(x,y){if(y>=70)return x>=63?'수정 동굴':(x>=30&&x<=58&&y<=78)?'눈꽃 마을':'서리 고원';if(x>=63)return y<=21?'불꽃 산':y<=45?'고대의 숲':'심해 해안';if(y>=46){if(y<=55)return '모래 언덕길';return x<30?'노을 마을':'별빛 도시';}if(y>=24)return x>=32?'갈대 벌판':'반짝 호숫가';if(x>=48&&y<=10)return '산들 마을';if(x>=32)return y<11?'솔바람 숲':'바위 들판';return '도트 마을';}
 function wildFor(x,y){let list,lo,hi;
-  if(x>=63){if(y<=21){list=[['crab',3],['fox',2],['fly',2],['bird',1]];lo=18;hi=22;}else if(y<=45){list=[['shroom',3],['bunny',2],['fly',2],['bird',2]];lo=18;hi=22;}else{list=[['jelly',3],['seal',3],['crab',1],['bird',1]];lo=20;hi=24;}}
+  if(y>=70){if(x>=63){list=[['mole',3],['turtle',2],['lizard',2],['moth',1],['fly',1]];lo=24;hi=28;}else{list=[['snowy',3],['pengu',2],['moth',2],['lizard',1],['bird',1]];lo=22;hi=26;}}
+  else if(x>=63){if(y<=21){list=[['crab',3],['fox',2],['fly',2],['bird',1]];lo=18;hi=22;}else if(y<=45){list=[['shroom',3],['bunny',2],['fly',2],['bird',2]];lo=18;hi=22;}else{list=[['jelly',3],['seal',3],['crab',1],['bird',1]];lo=20;hi=24;}}
   else if(y>=46){list=[['fox',2],['seal',2],['bunny',2],['crab',2],['jelly',2],['fly',2],['shroom',1],['bird',1]];lo=14;hi=18;}
   else if(y>=24){list=[['jelly',3],['seal',2],['bunny',2],['fox',2],['crab',2],['fly',2]];lo=12;hi=15;}
   else if(x>=32&&y<11){list=[['shroom',3],['bunny',2],['fly',3],['bird',2]];lo=8;hi=11;}
@@ -724,18 +786,18 @@ async function worldBag(){let i=0;
     if(pr){await msg(pr);continue;}await applyItem(k,m);}}
 
 /* world map overlay */
-const MINI_C={'L':'#e04a1e','V':'#5a4038','A':'#3a2620','H':'#9a6a3a','h':'#7a4a2a','P':'#8a5ad0','v':'#f3eee2','e':'#7a4a2a','.':'#8ccf63','*':'#8ccf63',',':'#3d8636','T':'#1d4f2a','~':'#3f95d8','=':'#e8d29a','s':'#f0dca0','r':'#8a8f99','R':'#d4504c','G':'#3fa66a','B':'#4a72cf','W':'#f3eee2','w':'#f3eee2','D':'#7a4a2a','d':'#7a4a2a','m':'#7a4a2a','S':'#c9944f'};
+const MINI_C={'L':'#e04a1e','V':'#5a4038','A':'#3a2620','H':'#9a6a3a','h':'#7a4a2a','P':'#8a5ad0','v':'#f3eee2','e':'#7a4a2a','.':'#8ccf63','*':'#8ccf63',',':'#3d8636','T':'#1d4f2a','~':'#3f95d8','=':'#e8d29a','s':'#f0dca0','r':'#8a8f99','R':'#d4504c','G':'#3fa66a','B':'#4a72cf','W':'#f3eee2','w':'#f3eee2','D':'#7a4a2a','d':'#7a4a2a','m':'#7a4a2a','S':'#c9944f','n':'#eef4fb','N':'#8fb0c4','Y':'#1f5a3a','I':'#bfe6f5','c':'#5a4c70','x':'#9fe8ff','X':'#2a2236'};
 let MINI=null;
 function showMap(){if(!MINI){MINI=document.createElement('canvas');MINI.width=MW;MINI.height=MH;const g=MINI.getContext('2d');for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){g.fillStyle=MINI_C[MAP[y][x]]||'#8ccf63';g.fillRect(x,y,1,1);}}
   return new Promise(res=>{const o={update(){if(pressed.has('a')||pressed.has('b')){sfx.back();closeOv(o);res();}},
   draw(){rect(0,0,W,H,'#1f3b3d');rect(0,0,W,20,'#2b4f63');text('지도 · 현재 위치: '+regionName(P.x,P.y),8,3,'#ffffff',8.5);
-    const s=2,ox=(W-MW*s)/2,oy=22;rect(ox-2,oy-2,MW*s+4,MH*s+4,INK);ctx.drawImage(MINI,ox,oy,MW*s,MH*s);
+    const s=Math.min(2,(W-8)/MW,(H-40)/MH),ox=Math.round((W-MW*s)/2),oy=22;rect(ox-2,oy-2,MW*s+4,MH*s+4,INK);ctx.drawImage(MINI,ox,oy,MW*s,MH*s);
     if(bridgeOpen())rect(ox+16*s,oy+32*s,2,6,'#a8743f');for(const L of LEGENDS)if(legendHere(L)&&(frame>>4)%2)rect(ox+L.x*s-1,oy+L.y*s-1,4,4,'#c58cff');
     for(const tr of TRAINERS)if(!G.beaten[tr.id])rect(ox+tr.x*s,oy+tr.y*s,3,3,'#ffd23a');
     if((frame>>3)%2){rect(ox+P.x*s-1,oy+P.y*s-1,5,5,'#ffffff');rect(ox+P.x*s,oy+P.y*s,3,3,'#e5483f');}
-    const ly=oy+MH*s+3;rect(ox,ly+4,5,5,'#e5483f');text('나',ox+7,ly,'#cfe3dc',6.5);rect(ox+22,ly+4,5,5,'#ffd23a');text('트레이너',ox+29,ly,'#cfe3dc',6.5);rect(ox+66,ly+4,5,5,'#c58cff');text('전설',ox+73,ly,'#cfe3dc',6.5);
-    const nb=(G.badge?1:0)+(G.badge2?1:0);text(`배지 ${nb}/2 · 도감 ${ORDER.filter(k=>G.caught[k]).length}/${ORDER.length} · 트레이너 ${TRAINERS.filter(t=>G.beaten[t.id]).length}/${TRAINERS.length}`,ox+100,ly,'#ffd23a',6.5);
-    for(const[nmT,x,y]of[['도트',8,3],['산들',53,2],['노을',10,58],['별빛',46,58],['불꽃 산',76,12],['고대의 숲',74,24],['심해 해안',72,47]])text(nmT,ox+x*s,oy+y*s,'#ffffff',6.5);}};overlays.push(o);});}
+    const ly=oy+MH*s+3,lx=4;rect(lx,ly+4,5,5,'#e5483f');text('나',lx+7,ly,'#cfe3dc',6.5);rect(lx+20,ly+4,5,5,'#ffd23a');text('트레이너',lx+27,ly,'#cfe3dc',6.5);rect(lx+62,ly+4,5,5,'#c58cff');text('전설',lx+69,ly,'#cfe3dc',6.5);
+    const nb=(G.badge?1:0)+(G.badge2?1:0),stl=`배지 ${nb}/2 · 도감 ${ORDER.filter(k=>G.caught[k]).length}/${ORDER.length} · 트레이너 ${TRAINERS.filter(t=>G.beaten[t.id]).length}/${TRAINERS.length}`;text(stl,W-4-measure(stl,6.5),ly,'#ffd23a',6.5);
+    for(const[nmT,x,y]of[['도트',8,3],['산들',53,2],['노을',10,58],['별빛',46,58],['불꽃 산',76,12],['고대의 숲',74,24],['심해 해안',72,47],['눈꽃',32,76],['수정 동굴',72,76]])text(nmT,ox+x*s,oy+y*s,'#ffffff',6.5);}};overlays.push(o);});}
 
 /* party screen overlay */
 function pickParty({title='몬스터',cancel=true,swap=false}={}){return new Promise(res=>{const o={i:0,sel:-1,
@@ -752,11 +814,12 @@ function pickParty({title='몬스터',cancel=true,swap=false}={}){return new Pro
 
 /* dex overlay */
 function showDex(){return new Promise(res=>{const o={i:0,
-  update(){const N=ORDER.length;if(pressed.has('left')){o.i=(o.i+N-1)%N;sfx.sel();}if(pressed.has('right')){o.i=(o.i+1)%N;sfx.sel();}if(pressed.has('up')||pressed.has('down')){o.i=o.i<6?Math.min(N-1,o.i+6):o.i-6;sfx.sel();}
+  update(){const N=ORDER.length;if(pressed.has('left')){o.i=(o.i+N-1)%N;sfx.sel();}if(pressed.has('right')){o.i=(o.i+1)%N;sfx.sel();}if(pressed.has('down')){o.i=o.i+6<N?o.i+6:o.i%6;sfx.sel();}if(pressed.has('up')){o.i=o.i>=6?o.i-6:Math.min(N-1,o.i+6*Math.floor((N-1-o.i)/6));sfx.sel();}
     if(pressed.has('b')||pressed.has('a')){sfx.back();closeOv(o);res();}},
   draw(){rect(0,0,W,H,'#d43f3a');rect(0,0,W,20,'#9e2a26');const seen=ORDER.filter(k=>G.seen[k]).length,got=ORDER.filter(k=>G.caught[k]).length;
-    text(`도감   발견 ${seen} · 포획 ${got} / ${ORDER.length}`,8,3,'#ffffff',8);
-    ORDER.forEach((k,i)=>{const x=6+(i%6)*38,y=24+Math.floor(i/6)*50,on=i===o.i;rect(x,y,36,46,on?'#ffd23a':SP[k].legend?'#3b2a6a':'#7a1e1b');rect(x+2,y+2,32,42,SP[k].legend?'#ece6ff':'#f6f1e4');
+    const pg=Math.floor(o.i/12),pgN=Math.ceil(ORDER.length/12);
+    text(`도감   발견 ${seen} · 포획 ${got} / ${ORDER.length}`,8,3,'#ffffff',8);text(`${pg+1}/${pgN}쪽`,206,4,'#ffd8d0',7);
+    ORDER.forEach((k,i)=>{if(Math.floor(i/12)!==pg)return;const j=i%12,x=6+(j%6)*38,y=24+Math.floor(j/6)*50,on=i===o.i;rect(x,y,36,46,on?'#ffd23a':SP[k].legend?'#3b2a6a':'#7a1e1b');rect(x+2,y+2,32,42,SP[k].legend?'#ece6ff':'#f6f1e4');
       text(SP[k].legend?'전설':'No.'+(i+1),x+4,y+2,'#9a9483',6.5);
       if(G.caught[k])spr(IMG[k],x+6,y+9,2);else if(G.seen[k])spr(SIL[k],x+6,y+9,2);else text('?',x+14,y+12,'#b8b2a0',12);
       const label=G.seen[k]?SP[k].n:'???';text(label,x+(36-measure(label,6.5))/2,y+33,INK,6.5);});
@@ -799,9 +862,10 @@ modes.battle={
   if(RLg){const c=RLg.bg;rect(-4,-4,W+8,134,c[0]);rect(-4,26,W+8,22,c[1]);rect(-4,48,W+8,22,c[2]);rect(-4,70,W+8,60,c[3]);for(let i=0;i<16;i++){const x=(i*41+frame)%W,y=(i*17)%66;rect(x,y,1,3,i%2?'#ffd23a':RLg.spark);}}
   else if(Bt.raid){rect(-4,-4,W+8,134,'#2a1838');rect(-4,26,W+8,22,'#3a2050');rect(-4,48,W+8,22,'#4a2a66');rect(-4,70,W+8,60,'#5a4a6a');const rc=Bt.raid.R.color;for(let i=0;i<10;i++){const x=(i*41+frame)%W,y=(i*17)%60;rect(x,y,1,3,rc);}}
   else if(Bt.legend){const c=Bt.legend.bg;rect(-4,-4,W+8,134,c[0]);rect(-4,26,W+8,22,c[1]);rect(-4,48,W+8,22,c[2]);rect(-4,70,W+8,60,c[3]);for(let i=0;i<24;i++){const x=(i*53)%W,y=(i*29)%66;if(((frame>>3)+i)%5)rect(x,y,1,1,'#ffffff');}}
-  else{rect(-4,-4,W+8,134,'#cfeeff');rect(-4,26,W+8,22,'#bfe6fb');rect(-4,48,W+8,22,'#b2dff6');rect(-4,70,W+8,60,'#a6d87c');}
-  for(let x=0;x<W;x+=24)rect(x+(x%48?6:14),80+(x%72)/6,3,1,'#8fc466');for(let x=10;x<W;x+=30)rect(x,104+(x%60)/10,4,1,'#8fc466');
-  {const p1=Bt.raid?'#3a2f4a':Bt.legend?Bt.legend.bg[4]:'#7fb85a',p2=Bt.raid?'#6d5a80':Bt.legend?Bt.legend.bg[5]:'#94cc6c';ellipse(178,62,40,8,p1);ellipse(178,61,38,7,p2);ellipse(64,118,46,9,p1);ellipse(64,117,44,8,p2);}
+  const FB=P.y>=70?(P.x>=63?['#1e1830','#2a2240','#362c52','#4a4058','#3a3248','#5a4c70','#7fd8ff']:['#e8f2ff','#dbeaff','#cfe2fb','#f4f8ff','#c8d8ea','#e0ecf8','#b8cce0']):null;
+  if(!RLg&&!Bt.raid&&!Bt.legend){const c=FB||['#cfeeff','#bfe6fb','#b2dff6','#a6d87c'];rect(-4,-4,W+8,134,c[0]);rect(-4,26,W+8,22,c[1]);rect(-4,48,W+8,22,c[2]);rect(-4,70,W+8,60,c[3]);}
+  {const tc=FB&&!Bt.raid&&!Bt.legend?FB[6]:'#8fc466';for(let x=0;x<W;x+=24)rect(x+(x%48?6:14),80+(x%72)/6,3,1,tc);for(let x=10;x<W;x+=30)rect(x,104+(x%60)/10,4,1,tc);}
+  {const p1=Bt.raid?'#3a2f4a':Bt.legend?Bt.legend.bg[4]:FB?FB[4]:'#7fb85a',p2=Bt.raid?'#6d5a80':Bt.legend?Bt.legend.bg[5]:FB?FB[5]:'#94cc6c';ellipse(178,62,40,8,p1);ellipse(178,61,38,7,p2);ellipse(64,118,46,9,p1);ellipse(64,117,44,8,p2);}
   // enemy
   if(Bt.legend&&e&&!Bt.hideE){for(let i=0;i<8;i++){const a=frame/18+i*Math.PI/4;rect(178+Math.cos(a)*34,38+Math.sin(a)*22,2,2,i%2?'#ffd23a':'#bfe9ff');}}
   if(e&&!Bt.hideE&&!(Bt.blink.e%6>=3)){ctx.save();ctx.beginPath();ctx.rect(-4,-4,W+8,64);ctx.clip();const bob=(frame>>4)%2;const sc=Bt.scale.e,g=Bt.gs.e,im=g&&g.gmax?GIMG[e.sp]:IMG[e.sp];if(sc>4)giantAura(178,62-6*sc,sc,g&&g.gmax);ctx.drawImage(im,Math.round(178-6*sc+Bt.slideE-(Bt.lunge.e?8:0)),Math.round(64-12*sc+bob+Bt.sink.e),Math.round(12*sc),Math.round(12*sc));ctx.restore();}
