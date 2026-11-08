@@ -212,7 +212,10 @@ const MOVES={
   starfall:{n:'유성낙하',t:'노말',p:90,a:90},
   frost:{n:'서리바람',t:'얼음',p:40,a:100}, icicle:{n:'고드름창',t:'얼음',p:75,a:90},
   mud:{n:'진흙던지기',t:'땅',p:40,a:100}, quake:{n:'땅울림',t:'땅',p:75,a:90},
-  blizzard:{n:'눈보라',t:'얼음',p:90,a:85}
+  blizzard:{n:'눈보라',t:'얼음',p:90,a:85},
+  flare:{n:'열화폭발',t:'불꽃',p:90,a:85}, tide:{n:'해일파도',t:'물',p:90,a:85}, forest:{n:'숲의분노',t:'풀',p:90,a:85},
+  skydive:{n:'급강하',t:'노말',p:80,a:90}, spore:{n:'포자폭탄',t:'풀',p:80,a:90}, thunder:{n:'천둥',t:'전기',p:90,a:80},
+  avalanche:{n:'눈사태',t:'얼음',p:85,a:90}, drill:{n:'드릴굴착',t:'땅',p:85,a:90}
 };
 const SP={
  fox:{n:'불꼬리',t:'불꽃',hp:45,atk:56,def:42,spd:62,exp:64,rate:.35,learn:[[1,'scratch'],[1,'ember'],[7,'gust'],[11,'blaze']],
@@ -286,8 +289,35 @@ SP.frosta={n:'설령',t:'얼음',hp:95,atk:90,def:84,spd:88,exp:240,rate:.15,leg
 SP.lumina={n:'루미나',t:'노말',hp:70,atk:66,def:62,spd:72,exp:180,rate:.3,legend:true,learn:[[1,'tackle'],[1,'gust'],[12,'zap'],[18,'starfall']],
   d:'새벽 첫 햇살과 함께 도트 마을에 내려온다는 작은 전설. 새로운 모험을 떠나는 트레이너 곁에 나타난다고 한다.',pal:{k:'#2a2050',a:'#fff6d8',b:'#ffd23a',c:'#ff9ad0',w:'#7ff0ff'},
   px:["..b......b..",".bab....bab.",".baak..kaab.","..kaakkaak..",".kaaaaaaaak.",".kawkaakwak.","ckaaaccaaakc","cckaaaaaakcc",".ckaabbaakc.","..kaabbaak..","..kak..kak..","..kk....kk.."]};
+/* --- 진화형 (evo:[레벨,'진화 후'] 은 진화 전 종에, from 은 진화 후 종에) --- */
+SP.hongyeom={n:'홍염호',t:'불꽃',hp:70,atk:84,def:62,spd:86,exp:150,rate:.15,from:'fox',learn:[[1,'scratch'],[1,'ember'],[7,'gust'],[11,'blaze'],[16,'flare']],
+  d:'불꼬리가 자란 모습. 갈기처럼 타오르는 불꽃과 두 갈래 꼬리로 하늘까지 불티를 날린다.',pal:{k:'#3a1010',a:'#e8501e',b:'#ffe0b0',c:'#ffd23a',r:'#ff2a1a'},
+  px:["c.k......k.c","rckk....kkcr","rkaak..kaakr","kaaakkkkaaak","kakaaaaaakak","kaaabbbbaaak","kaabbkkbbaak","rkabbbbbbakc","rckaaaaaakcr",".kaabbbbaakc","kaab.kk.baak","kkk......kkk"]};
+SP.padorae={n:'파도래',t:'물',hp:82,atk:68,def:78,spd:64,exp:150,rate:.15,from:'seal',learn:[[1,'tackle'],[1,'bubble'],[7,'peck'],[11,'wave'],[16,'tide']],
+  d:'퐁당이가 자란 모습. 머리 위 물마루로 파도를 불러 바다 위를 미끄러지듯 달린다.',pal:{k:'#12204a',a:'#2f7fd8',b:'#cfeaff',c:'#ffffff',w:'#7fd0ff'},
+  px:["..cwwc..c...",".kkkkkkkk.c.","kaaaaaaaaak.","kaakaaaakaak","kaaaabbaaaak","kaabbkkbbaak","kabbbbbbbbak","kabbbbbbbbak","kabbbbbbbbak","kakbbbbbbkak","kk.kbbbbk.kk","...kkkkkk..."]};
+SP.supdori={n:'숲토리',t:'풀',hp:76,atk:76,def:70,spd:78,exp:150,rate:.15,from:'bunny',learn:[[1,'tackle'],[1,'leaf'],[7,'scratch'],[11,'blade'],[16,'forest']],
+  d:'새순이가 자란 모습. 커다란 잎사귀 귀에 꽃이 피면 주변 풀숲이 한꺼번에 자라난다.',pal:{k:'#24301e',a:'#fbf7ee',b:'#ff9db0',c:'#3fa83a',w:'#ffd23a'},
+  px:[".cc......cc.","cccc....cccc","cwcc....ccwc",".kcck..kcck.","..kaaaaaak..",".kaaaaaaaak.",".kakaaaakak.","kbbaakkaabbk",".kaaaaaaaak.","kccaaaaaacck","kaaaaaaaaaak",".kkk.kk.kkk."]};
+SP.stormhawk={n:'먹구름매',t:'노말',hp:66,atk:74,def:58,spd:90,exp:120,rate:.3,from:'bird',learn:[[1,'peck'],[1,'tackle'],[6,'gust'],[18,'skydive']],
+  d:'뭉게새가 자란 모습. 먹구름을 두르고 높은 하늘에서 번개처럼 내리꽂는다.',pal:{k:'#22283a',a:'#d8dde8',b:'#8a94a8',c:'#ffb03a',w:'#ffffff'},
+  px:["..kkk.......",".kaaak..kk..","kaaaaakkaak.","kakaaaaaaaak","ccccaaaaaaak",".kkaaaabbbak","..kaaabbbbbk","kbbkaabbbbk.","kbbbkabbbk..",".kbbbkbbk...","..kk.c.c....","....cc.cc..."]};
+SP.shroomking={n:'버섯대장',t:'풀',hp:80,atk:66,def:80,spd:40,exp:125,rate:.3,from:'shroom',learn:[[1,'tackle'],[1,'leaf'],[10,'blade'],[20,'spore']],
+  d:'버섯꼬마가 자란 모습. 수염처럼 자란 갓 아래로 포자를 뿌려 숲의 꼬마들을 지킨다.',pal:{k:'#3a1a1a',a:'#c8302a',w:'#ffffff',b:'#f6e2bf',c:'#8a5a3a'},
+  px:["..kkkkkkkk..",".kaawaaawak.","kawwaaaawwak","kaaaawaaaaak","kwaaaaaaawak","kkkkkkkkkkkk",".kbbbbbbbbk.",".kbkbbbbkbk.",".kbccbbccbk.","..kbbbbbbk..",".kbbk..kbbk.",".kkk....kkk."]};
+SP.voltfly={n:'번개반디',t:'전기',hp:60,atk:82,def:56,spd:98,exp:130,rate:.3,from:'fly',learn:[[1,'tackle'],[1,'zap'],[9,'bolt'],[20,'thunder']],
+  d:'반딧벌이 자란 모습. 배의 빛이 번개처럼 번쩍여 밤하늘에 신호를 그린다.',pal:{k:'#2a2416',a:'#ffe14d',b:'#6b4a2b',c:'#bfe9ff',w:'#ffffff',y:'#fff6a0'},
+  px:["..k......k..","...k.kk.k...","cc.kbbbbk.cc","ccckbwwbkccc","wcckbbbbkccw",".cckaaaakcc.","..kayyyyak..",".kayaaaayak.",".kaaayyaaak.","..kayyyyak..","...kaaaak...","....kkkk...."]};
+SP.snowboss={n:'눈대장',t:'얼음',hp:76,atk:66,def:80,spd:56,exp:140,rate:.25,from:'snowy',learn:[[1,'tackle'],[1,'frost'],[12,'scratch'],[16,'icicle'],[28,'avalanche']],
+  d:'눈뭉치가 자란 모습. 목도리를 두른 두 단 몸으로 고원의 눈밭을 지키는 대장.',pal:{k:'#2a3a4a',a:'#ffffff',b:'#cfe8f5',c:'#7a4a2a',r:'#3a6fd8',s:'#e5483f'},
+  px:["....rrrr....","...rrrrrr...","...kkkkkk...","..kakaakak..","..kaaaaaak..","..ssssssss..","ckkaaaaaakkc",".ckaabbaakc.","kaaaaaaaaaak","kabaaaaaabak","kbbaaaaaabbk",".kkkkkkkkkk."]};
+SP.drillmole={n:'굴착왕',t:'땅',hp:82,atk:90,def:72,spd:52,exp:145,rate:.25,from:'mole',learn:[[1,'scratch'],[1,'mud'],[12,'tackle'],[16,'quake'],[28,'drill']],
+  d:'흙두더가 자란 모습. 강철 투구와 드릴 같은 앞발로 바위산도 하룻밤에 뚫는다.',pal:{k:'#2a1a10',a:'#6a4428',b:'#d8b088',c:'#ff9db0',w:'#ffd23a',g:'#9aa0aa'},
+  px:["...gggggg...","..ggwwwwgg..","..kkkkkkkk..",".kaaaaaaaak.",".kakaaaakak.","gkaaaacaaakg","ggkbbbbbbkgg","gggkbbbbkggg",".gkaaaaaakg.","..kaaaaaak..","..kaakkaak..","..kkk..kkk.."]};
+for(const[a,lv,b]of[['fox',16,'hongyeom'],['seal',16,'padorae'],['bunny',16,'supdori'],['bird',18,'stormhawk'],['shroom',20,'shroomking'],['fly',20,'voltfly'],['snowy',28,'snowboss'],['mole',28,'drillmole']])SP[a].evo=[lv,b];
 const FROST6=['snowy','pengu','moth','mole','turtle','lizard'];
-const ORDER=['fox','seal','bunny','bird','shroom','fly','jelly','crab',...FROST6,'lumina','astra','marea','silva','ignis','frosta'];
+const withEvo=a=>a.flatMap(k=>SP[k].evo?[k,SP[k].evo[1]]:[k]);
+const ORDER=[...withEvo(['fox','seal','bunny','bird','shroom','fly','jelly','crab',...FROST6]),'lumina','astra','marea','silva','ignis','frosta'];
 const BASE8=['fox','seal','bunny','bird','shroom','fly','jelly','crab'];
 const GNAME={'노말':'거대 충격','불꽃':'거대 화염','물':'거대 해일','풀':'거대 수풀','전기':'거대 번개','얼음':'거대 빙하','땅':'거대 지진'};
 const gpow=p=>p<=45?90:p<=60?110:130;
@@ -300,6 +330,7 @@ const GMAX={
  marea:{n:'초거대 대해일',t:'물',p:150,fx:'heal',pal:{a:'#12b8c8',b:'#e8ffff',c:'#ffd23a'}},
  silva:{n:'초거대 생명의숲',t:'풀',p:150,fx:'heal',pal:{a:'#f0f0f0',c:'#ff7ab8',b:'#c8ffb0'}}
 };
+for(const k of ['hongyeom','padorae','supdori'])GMAX[k]=GMAX[SP[k].from];   // 진화한 파트너도 초거대화 유지
 function giantMove(id,m){const mv=MOVES[id],g=GMAX[m.sp];if(m.gmax&&g&&mv.t===g.t)return{n:g.n,t:g.t,p:g.p,a:101,fx:g.fx,gmax:true};return{n:GNAME[mv.t],t:mv.t,p:gpow(mv.p),a:101};}
 const STARTERS=['fox','seal','bunny'];
 const IMG={},SIL={},GIMG={};
@@ -521,7 +552,7 @@ function healAll(){for(const m of G.party)m.hp=stats(m).hp;for(const m of G.box)
 const KEY='dotmon-adventure-v1';
 function save(){try{localStorage.setItem(KEY,JSON.stringify({G,P:{x:P.x,y:P.y,dir:P.dir}}));}catch(e){}}
 function loadSave(){try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):null;}catch(e){return null;}}
-function applySave(s){G=s.G;G.beaten=G.beaten||{};G.gifts=G.gifts||{};G.lc=G.lc||{};G.lg=G.lg||{};G.ln=G.ln||{};G.rd=G.rd||{};G.rb=G.rb||{};if(G.legendCaught){G.lc.astra=1;delete G.legendCaught;}delete G.legendGone;for(const k of ITEM_ORDER)G.items[k]=G.items[k]||0;if(G.money==null)G.money=1000;if(G.badge)G.band=true;for(const m of [...G.party,...G.box]){delete m._giant;delete m._raid;}if(!G.party.concat(G.box).some(m=>m.gmax)){const st=G.party.find(m=>STARTERS.includes(m.sp));if(st)st.gmax=true;}Object.assign(P,s.P,{tx:s.P.x,ty:s.P.y,moving:false});}
+function applySave(s){G=s.G;G.beaten=G.beaten||{};G.gifts=G.gifts||{};G.lc=G.lc||{};G.lg=G.lg||{};G.ln=G.ln||{};G.rd=G.rd||{};G.rb=G.rb||{};if(G.legendCaught){G.lc.astra=1;delete G.legendCaught;}delete G.legendGone;for(const k of ITEM_ORDER)G.items[k]=G.items[k]||0;if(G.money==null)G.money=1000;if(G.badge)G.band=true;for(const m of [...G.party,...G.box]){delete m._giant;delete m._raid;}if(!G.party.concat(G.box).some(m=>m.gmax)){const st=G.party.find(m=>STARTERS.includes(m.sp)||STARTERS.includes(SP[m.sp].from));if(st)st.gmax=true;}Object.assign(P,s.P,{tx:s.P.x,ty:s.P.y,moving:false});}
 
 /* ================= input ================= */
 const held={up:false,down:false,left:false,right:false};
@@ -876,8 +907,8 @@ async function trainerSpot(tr,seen){const w=modes.world;w.lock=true;
   startBattle({trainer:tr.name,giant:!!tr.giant,team:tr.team.map(([s,l])=>mkMon(s,l)),onWin:async()=>{G.beaten[tr.id]=1;await msg(`${tr.name}: ${tr.lose}`);}});}
 function regionName(x,y){if(y>=70)return x>=63?'수정 동굴':(x>=30&&x<=58&&y<=78)?'눈꽃 마을':'서리 고원';if(x>=63)return y<=21?'불꽃 산':y<=45?'고대의 숲':'심해 해안';if(y>=46){if(y<=55)return '모래 언덕길';return x<30?'노을 마을':'별빛 도시';}if(y>=24)return x>=32?'갈대 벌판':'반짝 호숫가';if(x>=48&&y<=10)return '산들 마을';if(x>=32)return y<11?'솔바람 숲':'바위 들판';return '도트 마을';}
 function wildFor(x,y){let list,lo,hi;
-  if(y>=70){if(x>=63){list=[['mole',3],['turtle',2],['lizard',2],['moth',1],['fly',1]];lo=24;hi=28;}else{list=[['snowy',3],['pengu',2],['moth',2],['lizard',1],['bird',1]];lo=22;hi=26;}}
-  else if(x>=63){if(y<=21){list=[['crab',3],['fox',2],['fly',2],['bird',1]];lo=18;hi=22;}else if(y<=45){list=[['shroom',3],['bunny',2],['fly',2],['bird',2]];lo=18;hi=22;}else{list=[['jelly',3],['seal',3],['crab',1],['bird',1]];lo=20;hi=24;}}
+  if(y>=70){if(x>=63){list=[['mole',3],['drillmole',.4],['turtle',2],['lizard',2],['moth',1],['fly',1]];lo=24;hi=28;}else{list=[['snowy',3],['snowboss',.4],['pengu',2],['moth',2],['lizard',1],['bird',1]];lo=22;hi=26;}}
+  else if(x>=63){if(y<=21){list=[['crab',3],['fox',2],['fly',2],['bird',1],['voltfly',.4],['stormhawk',.4]];lo=18;hi=22;}else if(y<=45){list=[['shroom',3],['bunny',2],['fly',2],['bird',2],['shroomking',.4]];lo=18;hi=22;}else{list=[['jelly',3],['seal',3],['crab',1],['bird',1]];lo=20;hi=24;}}
   else if(y>=46){list=[['fox',2],['seal',2],['bunny',2],['crab',2],['jelly',2],['fly',2],['shroom',1],['bird',1]];lo=14;hi=18;}
   else if(y>=24){list=[['jelly',3],['seal',2],['bunny',2],['fox',2],['crab',2],['fly',2]];lo=12;hi=15;}
   else if(x>=32&&y<11){list=[['shroom',3],['bunny',2],['fly',3],['bird',2]];lo=8;hi=11;}
@@ -1107,10 +1138,33 @@ async function checkFaints(){const e=Bt.e,p=act();
     await msg('싸울 수 있는 몬스터가 없다...');await msg('눈앞이 캄캄해졌다!');await blackout();return 'end';}
   return 'ok';}
 async function gainExp(m,amt){m.exp+=amt;await msg(`${josa(nm(m),'은','는')} 경험치 ${amt}을 얻었다!`,18);await levelCheck(m);}
+async function teach(m,id){if(m.moves.includes(id))return;if(m.moves.length<4){m.moves.push(id);await msg(`${josa(nm(m),'은','는')} ${josa(MOVES[id].n,'을','를')} 배웠다!`);}
+  else{const old2=m.moves.shift();m.moves.push(id);await msg(`${josa(nm(m),'은','는')} ${josa(MOVES[old2].n,'을','를')} 잊고 ${josa(MOVES[id].n,'을','를')} 배웠다!`);}}
+const canEvolve=m=>{const e=SP[m.sp].evo;return !!(e&&m.lv>=e[0]);};
+let EVQ=[];   // 배틀 중 진화 조건을 채운 몬스터 → 배틀 끝나고 진화
 async function levelCheck(m){
   while(m.lv<50&&m.exp>=expFor(m.lv+1)){const old=stats(m).hp;m.lv++;m.hp+=stats(m).hp-old;sfx.lvl();await msg(`${nm(m)}의 레벨이 올랐다! (Lv.${m.lv})`);
-    for(const[l,id]of SP[m.sp].learn)if(l===m.lv&&!m.moves.includes(id)){if(m.moves.length<4){m.moves.push(id);await msg(`${josa(nm(m),'은','는')} ${josa(MOVES[id].n,'을','를')} 배웠다!`);}
-      else{const old2=m.moves.shift();m.moves.push(id);await msg(`${josa(nm(m),'은','는')} ${josa(MOVES[old2].n,'을','를')} 잊고 ${josa(MOVES[id].n,'을','를')} 배웠다!`);}}}}
+    for(const[l,id]of SP[m.sp].learn)if(l===m.lv)await teach(m,id);}
+  if(canEvolve(m)){if(mode===modes.battle){if(!EVQ.includes(m))EVQ.push(m);}else await evolve(m);}}
+const roJ=w=>{const c=w.charCodeAt(w.length-1),f=(c>=0xAC00&&c<=0xD7A3)?(c-0xAC00)%28:0;return w+(f===0||f===8?'로':'으로');};
+async function evolve(m){if(!canEvolve(m))return;const from=m.sp,to=SP[from].evo[1],oldName=SP[from].n;
+  await msg(`어라...? ${josa(oldName,'의','의')} 모습이...!`);
+  const o={t:0,cancel:false,update(){this.t++;if(pressed.has('b')&&this.t<200&&!this.cancel){this.cancel=true;sfx.back();}},
+    draw(){const t=this.t;rect(0,0,W,H,'#14102a');for(let i=0;i<30;i++){const a=i*.7+t/30,r=40+((i*37+t*2)%90);rect(120+Math.cos(a)*r,66+Math.sin(a)*r*.7,2,2,i%3?'#ffffff':'#ffd23a');}
+      ctx.globalAlpha=.25;ellipse(120,66,50,46,'#fff3b0');ctx.globalAlpha=1;
+      const per=Math.max(3,26-Math.floor(t/9)),flip=t>30&&Math.floor(t/per)%2===1,done=t>=230&&!this.cancel;
+      const sp=done?to:this.cancel?from:(flip?to:from),img=(done||this.cancel)?IMG[sp]:SIL[sp];
+      if(!done&&!this.cancel){ctx.globalAlpha=.9;}spr(img,120-36,30,6);ctx.globalAlpha=1;
+      if(t>=214&&t<246&&!this.cancel){ctx.globalAlpha=Math.max(0,1-Math.abs(t-230)/16);rect(0,0,W,H,'#ffffff');ctx.globalAlpha=1;}
+      if(t<200&&!this.cancel)text('B: 진화 멈추기',W-68,H-14,'#9a94c8',7);}};
+  overlays.push(o);seq([262,330,392,330,392,494,392,494,587,659,784],.13,'square',.04,.1);
+  await waitUntil(()=>o.t>=250||(o.cancel&&o.t>=40));
+  if(o.cancel){await msg(`${josa(oldName,'의','의')} 변화가 멈췄다.`);closeOv(o);return;}
+  const oldMax=stats(m).hp;m.sp=to;m.hp=m.hp>0?Math.min(stats(m).hp,m.hp+stats(m).hp-oldMax):0;G.seen[to]=1;G.caught[to]=1;
+  sfx.catch();await msg(`축하합니다! ${josa(oldName,'은','는')} ${roJ(SP[to].n)} 진화했다!`);
+  for(const[l,id]of SP[to].learn)if(l>=SP[from].evo[0]&&l<=m.lv)await teach(m,id);
+  closeOv(o);}
+async function runEvolutions(){const q=EVQ;EVQ=[];for(const m of q)if((G.party.includes(m)||G.box.includes(m))&&canEvolve(m))await evolve(m);}
 async function throwBall(k='ball'){const it=ITEMS[k];G.items[k]--;const e=Bt.e,st=stats(e);await msg(`${josa(it.n,'을','를')} 던졌다!`,6);
   Bt.capsule={x:50,y:96,t:0,top:k==='superball'?'#3f7fe0':'#e5483f'};await waitUntil(()=>{const c=Bt.capsule;c.t++;const k=c.t/26;c.x=50+(174-50)*k;c.y=96+(46-96)*k-Math.sin(k*Math.PI)*46;return c.t>=26;});
   fx={t:0,kind:'flash',len:12,res:()=>{}};Bt.hideE=true;Bt.capsule.y=48;sfx.shake();await wait(24);
@@ -1128,7 +1182,7 @@ async function trainerWin(){await msg('도윤: 대단해! 몬스터들과 호흡
     sfx.giant();await msg('도윤: 그리고 이건 특별한 선물, 거대화 밴드야!');await msg('배틀에서 기술을 고를 때 MENU 버튼을 누르면 한 번 거대화할 수 있어. 3턴 동안 몸집과 HP가 2배가 되고 기술이 거대 기술로 바뀌지!');
     {const st=G.party.concat(G.box).find(m=>m.gmax);if(st)await msg(`도윤: 그리고 너의 ${josa(nm(st),'은','는')} 초거대화 인자를 가지고 있어. 거대화하면 특별한 모습과 전용 기술을 쓸 수 있을 거야!`);}await msg('축하해요! 체육관 클리어! 관장은 더 강해져서 다시 기다린대요.');await msg('도윤: 소문으로는 트레이너 8명을 모두 이긴 사람에게 반짝 호숫가 섬의 전설이 모습을 보인대.');}
   else await msg('도윤: 다음엔 더 강해져서 기다릴게!');G.gymWins++;}
-async function endBattle(){clearGiant();await transition();Bt.capsule=null;setMode(modes.world);modes.world.cool=10;fadeIn();modes.world.lock=true;await wait(16);await legendNotices();modes.world.lock=false;save();}
+async function endBattle(){clearGiant();await transition();Bt.capsule=null;setMode(modes.world);modes.world.cool=10;fadeIn();modes.world.lock=true;await wait(16);await runEvolutions();await legendNotices();modes.world.lock=false;save();}
 async function blackout(){clearGiant();await transition();healAll();const lost=Math.floor(G.money/4);G.money-=lost;Object.assign(P,{x:7,y:6,tx:7,ty:6,dir:'down',moving:false});setMode(modes.world);fadeIn();const w=modes.world;w.lock=true;
   await msg('정신을 차려 보니 도트몬 센터 앞이었다. 몬스터들은 모두 회복되었다.');if(lost)await msg(`허둥대다가 ${lost.toLocaleString()}코인을 잃어버렸다...`);w.lock=false;save();}
 
