@@ -198,9 +198,10 @@ function spr(img,x,y,s=1,flip=false){x=Math.round(x);y=Math.round(y);
   if(flip){ctx.save();ctx.translate(x+img.width*s,y);ctx.scale(-1,1);ctx.drawImage(img,0,0,img.width*s,img.height*s);ctx.restore();}
   else ctx.drawImage(img,x,y,img.width*s,img.height*s);}
 
-const TYPES={'노말':'#9a968c','불꽃':'#ec6a34','물':'#3f87dc','풀':'#4fae4f','전기':'#e3b51a','얼음':'#5cc4d8','땅':'#b8864a'};
-const CHART={'불꽃':{'풀':2,'얼음':2,'물':.5,'불꽃':.5},'물':{'불꽃':2,'땅':2,'풀':.5,'물':.5},'풀':{'물':2,'땅':2,'불꽃':.5,'풀':.5},'전기':{'물':2,'풀':.5,'전기':.5,'땅':.5},
- '얼음':{'풀':2,'땅':2,'불꽃':.5,'물':.5,'얼음':.5},'땅':{'불꽃':2,'전기':2,'풀':.5},'노말':{}};
+const TYPES={'노말':'#9a968c','불꽃':'#ec6a34','물':'#3f87dc','풀':'#4fae4f','전기':'#e3b51a','얼음':'#5cc4d8','땅':'#b8864a','바위':'#a08c64','독':'#a05ac8'};
+const CHART={'불꽃':{'풀':2,'얼음':2,'물':.5,'불꽃':.5,'바위':.5},'물':{'불꽃':2,'땅':2,'바위':2,'풀':.5,'물':.5},'풀':{'물':2,'땅':2,'바위':2,'불꽃':.5,'풀':.5,'독':.5},'전기':{'물':2,'풀':.5,'전기':.5,'땅':.5},
+ '얼음':{'풀':2,'땅':2,'불꽃':.5,'물':.5,'얼음':.5},'땅':{'불꽃':2,'전기':2,'바위':2,'독':2,'풀':.5},'노말':{'바위':.5},
+ '바위':{'불꽃':2,'얼음':2,'땅':.5,'바위':.5},'독':{'풀':2,'땅':.5,'바위':.5,'독':.5}};
 const eff=(mt,dt)=>(CHART[mt]&&CHART[mt][dt])||1;
 const MOVES={
   tackle:{n:'몸통박치기',t:'노말',p:40,a:100}, scratch:{n:'할퀴기',t:'노말',p:40,a:100},
@@ -215,7 +216,9 @@ const MOVES={
   blizzard:{n:'눈보라',t:'얼음',p:90,a:85},
   flare:{n:'열화폭발',t:'불꽃',p:90,a:85}, tide:{n:'해일파도',t:'물',p:90,a:85}, forest:{n:'숲의분노',t:'풀',p:90,a:85},
   skydive:{n:'급강하',t:'노말',p:80,a:90}, spore:{n:'포자폭탄',t:'풀',p:80,a:90}, thunder:{n:'천둥',t:'전기',p:90,a:80},
-  avalanche:{n:'눈사태',t:'얼음',p:85,a:90}, drill:{n:'드릴굴착',t:'땅',p:85,a:90}
+  avalanche:{n:'눈사태',t:'얼음',p:85,a:90}, drill:{n:'드릴굴착',t:'땅',p:85,a:90},
+  rock:{n:'돌던지기',t:'바위',p:40,a:100}, slide:{n:'바위사태',t:'바위',p:75,a:90}, ancient:{n:'고대의힘',t:'바위',p:90,a:90},
+  sting:{n:'독침',t:'독',p:40,a:100}, sludge:{n:'오물폭탄',t:'독',p:75,a:90}
 };
 const SP={
  fox:{n:'불꼬리',t:'불꽃',hp:45,atk:56,def:42,spd:62,exp:64,rate:.35,learn:[[1,'scratch'],[1,'ember'],[7,'gust'],[11,'blaze']],
@@ -314,12 +317,53 @@ SP.snowboss={n:'눈대장',t:'얼음',hp:76,atk:66,def:80,spd:56,exp:140,rate:.2
 SP.drillmole={n:'굴착왕',t:'땅',hp:82,atk:90,def:72,spd:52,exp:145,rate:.25,from:'mole',learn:[[1,'scratch'],[1,'mud'],[12,'tackle'],[16,'quake'],[28,'drill']],
   d:'흙두더가 자란 모습. 강철 투구와 드릴 같은 앞발로 바위산도 하룻밤에 뚫는다.',pal:{k:'#2a1a10',a:'#6a4428',b:'#d8b088',c:'#ff9db0',w:'#ffd23a',g:'#9aa0aa'},
   px:["...gggggg...","..ggwwwwgg..","..kkkkkkkk..",".kaaaaaaaak.",".kakaaaakak.","gkaaaacaaakg","ggkbbbbbbkgg","gggkbbbbkggg",".gkaaaaaakg.","..kaaaaaak..","..kaakkaak..","..kkk..kkk.."]};
-for(const[a,lv,b]of[['fox',16,'hongyeom'],['seal',16,'padorae'],['bunny',16,'supdori'],['bird',18,'stormhawk'],['shroom',20,'shroomking'],['fly',20,'voltfly'],['snowy',28,'snowboss'],['mole',28,'drillmole']])SP[a].evo=[lv,b];
+/* --- 동부: 번개 협곡 · 독안개 늪 · 고대 유적의 몬스터 --- */
+SP.pebble={n:'돌멩군',t:'바위',hp:50,atk:55,def:70,spd:25,exp:58,rate:.6,learn:[[1,'tackle'],[1,'rock'],[18,'slide']],
+  d:'협곡 바닥을 굴러다니는 동글동글한 돌. 작은 조약돌 팔로 친구들과 돌탑을 쌓는다.',pal:{k:'#2a2620',a:'#9a8c74',b:'#c8bca0',c:'#6a5e4a'},
+  px:["....kkkk....","..kkaaaakk..",".kaabbaaaak.",".kabbaaacak.","kaaaaaaaaaak","kakkaaaakkak","kaaaaaaaaaak","kcaaakkaaack",".kcaaaaaack.","k.kcccccck.k","kk.kk..kk.kk","............"]};
+SP.boulder={n:'거암군',t:'바위',hp:80,atk:85,def:100,spd:30,exp:150,rate:.3,from:'pebble',learn:[[1,'tackle'],[1,'rock'],[18,'slide'],[30,'quake']],
+  d:'돌멩군이 자란 모습. 등에 이끼가 자랄 만큼 오래 버틴 단단한 바위 몸을 가졌다.',pal:{k:'#22201a',a:'#8a7c64',b:'#b8ac90',c:'#5a4e3a',g:'#5fae4a'},
+  px:["..gggkkkg...",".kgkaaaakgk.","kaabbaaaaaak","kabbaaaacaak","kaaaaaaaaaak","kakkaaaakkak","kaaaaaaaaaak","kcaakkkkaack","kkcaaaaaackk","kaakcccckaak","kaak.kk.kaak","kkk......kkk"]};
+SP.stonecat={n:'석상냥',t:'바위',hp:55,atk:60,def:65,spd:60,exp:64,rate:.5,learn:[[1,'scratch'],[1,'rock'],[20,'slide']],
+  d:'고대 유적의 문을 지키던 고양이 석상. 이마의 보석이 빛나면 살아 움직인다.',pal:{k:'#1e2a2a',a:'#8aa0a0',b:'#b8cccc',c:'#3fd0c0'},
+  px:[".k......k...",".kk....kk...",".kakkkkak...","kaaaaaaaak..","kacaaaacak..","kaaabbaaak..",".kaaaaaak...","..kabbak..k.",".kaabbaak.k.",".kaabbaakak.",".kaakkaakk..",".kkk..kkk..."]};
+SP.raptor={n:'화석랩터',t:'바위',hp:60,atk:80,def:55,spd:70,exp:80,rate:.35,learn:[[1,'scratch'],[1,'rock'],[22,'slide'],[28,'quake']],
+  d:'유적 깊은 곳 화석에서 깨어난 작은 공룡. 뼈만 남은 몸으로도 아주 날쌔다.',pal:{k:'#2a2418',a:'#e8dcc0',b:'#b8a888',c:'#e5483f'},
+  px:["......kkkk..",".....kaaaak.",".....kacaaak",".....kaaakk.","....kaaak...","k..kbabak...","kk.kabaak...",".kkaababk...","..kabaabk...","...kaaak....","...kak.k....","..kk..kk...."]};
+SP.goat={n:'번개뿔',t:'전기',hp:58,atk:66,def:52,spd:62,exp:64,rate:.5,learn:[[1,'tackle'],[1,'zap'],[18,'bolt']],
+  d:'협곡 절벽을 뛰어다니는 산양. 번개 모양 뿔에 벼락을 모아 둔다.',pal:{k:'#2a2416',a:'#f0e8d0',b:'#c0b498',c:'#ffd23a'},
+  px:["c..........c","cc........cc",".cck....kcc.","...kaaaak...","..kaaaaaak..","..kakaakak..","..kaabbaak..","...kaaaakkk.","..kaaaaaaaak","..kaaaaaaaak","..kak.kak.kk","..kk..kk...."]};
+SP.cloud={n:'뇌운이',t:'전기',hp:50,atk:60,def:50,spd:75,exp:62,rate:.55,learn:[[1,'gust'],[1,'zap'],[20,'bolt'],[30,'thunder']],
+  d:'천둥 마을 하늘을 떠다니는 작은 먹구름. 기분이 나쁘면 찌릿한 비를 뿌린다.',pal:{k:'#2a2a3a',a:'#c8ccd8',b:'#8a90a4',c:'#ffd23a',w:'#ffffff'},
+  px:["....kkkk....","..kkwwaakk..",".kwwaaaaaak.","kaaaaaaaaaak","kakkaaaakkak","kaaaaaaaaaak","kbaaabbaaabk",".kbbbbbbbbk.","..kkkkkkkk..","....c..c....","...c..c.....","..c..c......"]};
+SP.toad={n:'보라두꺼',t:'독',hp:60,atk:55,def:55,spd:40,exp:60,rate:.6,learn:[[1,'tackle'],[1,'sting'],[18,'sludge'],[24,'bubble']],
+  d:'늪의 안개 속에서 개굴개굴 우는 두꺼비. 등의 점박이에서 독 거품이 나온다.',pal:{k:'#2a1a3a',a:'#9a5ac8',b:'#d8b0f0',c:'#ffd23a'},
+  px:["............","..kk....kk..",".kcck..kcck.",".kkkkkkkkkk.","kaaaaaaaaaak","kabaaaaaabak","kaaakkkkaaak","kaaaaaaaaaak",".kabbbbbbak.","kaakbbbbkaak","kak.kkkk.kak","kk........kk"]};
+SP.toadking={n:'독두꺼왕',t:'독',hp:90,atk:80,def:80,spd:50,exp:150,rate:.3,from:'toad',learn:[[1,'tackle'],[1,'sting'],[18,'sludge'],[24,'bubble'],[30,'wave']],
+  d:'보라두꺼가 자란 모습. 머리의 왕관 같은 돌기로 늪 전체의 안개를 다스린다.',pal:{k:'#24123a',a:'#7a3ab0',b:'#d8b0f0',c:'#ffd23a',g:'#5ad06a'},
+  px:["..c.c..c.c..","..ccccccc...",".kkk....kkk.","kgcgk..kgcgk","kkkkkkkkkkkk","kaabaaaabaak","kaaakkkkaaak","kaaaaaaaaaak","kaabbbbbbaak","kaakbbbbkaak","kaak.kk.kaak","kkk......kkk"]};
+SP.snake={n:'안개뱀',t:'독',hp:52,atk:66,def:48,spd:66,exp:62,rate:.55,learn:[[1,'sting'],[1,'scratch'],[20,'sludge']],
+  d:'짙은 안개 속에 몸을 감추고 있다가 갑자기 나타나 놀래 준다.',pal:{k:'#2a1e30',a:'#8a6aa0',b:'#c8b0d8',c:'#ff6b8a',w:'#ffffff'},
+  px:["......kkkk..",".....kaaaak.",".....kawaak.","......kaaakc",".......kak..","..kkkk.kak..",".kaaaakkak..","kabbbbaaak..","kaaaaaaak...",".kbbbbbbak..","..kaaaaaak..","...kkkkkk..."]};
+SP.wasp={n:'보라벌',t:'독',hp:44,atk:70,def:40,spd:80,exp:60,rate:.55,learn:[[1,'sting'],[1,'peck'],[18,'sludge'],[24,'gust']],
+  d:'늪가 꽃밭을 윙윙 날아다닌다. 화나면 꼬리 침이 보랏빛으로 빛난다.',pal:{k:'#1a1020',a:'#a05ac8',b:'#ffd23a',c:'#e8f0ff'},
+  px:["..k.....k...","...k...k....","cc.kkkkk.cc.","ccckaaakccc.",".cckakakcc..","..kaaaaak...","..kbbbbbk...","..kaaaaak...","..kbbbbbk...","...kaaak....","....kak.....",".....k......"]};
+SP.frog={n:'연잎개구',t:'풀',hp:56,atk:52,def:54,spd:58,exp:58,rate:.6,learn:[[1,'bubble'],[1,'leaf'],[16,'blade'],[22,'wave']],
+  d:'연잎을 모자처럼 쓰고 다니는 개구리. 비가 오면 연잎 위에서 춤을 춘다.',pal:{k:'#1a2a1a',a:'#6ac04a',b:'#d8f0b0',c:'#3a8a3a',r:'#ff9ad0'},
+  px:["...cccccc...","..ccrrcccc..","..kkkkkkkk..",".kakaaaakak.",".kaaaaaaaak.","kaaakkkkaaak","kaabbbbbbaak",".kabbbbbbak.","kaakaaaakaak","kak.kaak.kak","kk..kkkk..kk","............"]};
+SP.lantern={n:'유령등불',t:'불꽃',hp:50,atk:68,def:50,spd:64,exp:70,rate:.4,learn:[[1,'ember'],[1,'tackle'],[20,'blaze'],[28,'flare']],
+  d:'유적 복도를 떠도는 등불. 길 잃은 여행자를 출구까지 비춰 준다는 소문이 있다.',pal:{k:'#2a1a10',a:'#e86a2a',b:'#ffd23a',c:'#fff3b0',g:'#6a4a8a'},
+  px:["....kkkk....","...kggggk...","..kkkkkkkk..","..kbbbbbbk..",".kbccccccbk.",".kbckcckcbk.",".kbccccccbk.",".kbcckkccbk.","..kbbbbbbk..","..kkkkkkkk..","...kaaaak...","....kaak...."]};
+SP.monolith={n:'모노리스',t:'바위',hp:110,atk:92,def:110,spd:60,exp:260,rate:.12,legend:true,learn:[[1,'rock'],[1,'quake'],[30,'slide'],[36,'ancient']],
+  d:'고대 유적 한가운데 서 있던 거대한 돌기둥. 몸의 문양이 빛나면 땅이 울리며 깨어난다.',pal:{k:'#1a1a24',a:'#6a6a80',b:'#9a9ab0',c:'#4ae8ff',w:'#ffd23a'},
+  px:["....kkkk....","...kbbbbk...","..kbaaaabk..","..kawccwak..","..kaaaaaak..","kkkacaacakkk","kbbaaccaabbk","kaakaaaakaak",".k.kacaak.k.","...kaaaak...","...kakkak...","..kkk..kkk.."]};
+const EAST10=['pebble','stonecat','raptor','goat','cloud','toad','snake','wasp','frog','lantern'];
+for(const[a,lv,b]of[['pebble',30,'boulder'],['toad',30,'toadking'],['fox',16,'hongyeom'],['seal',16,'padorae'],['bunny',16,'supdori'],['bird',18,'stormhawk'],['shroom',20,'shroomking'],['fly',20,'voltfly'],['snowy',28,'snowboss'],['mole',28,'drillmole']])SP[a].evo=[lv,b];
 const FROST6=['snowy','pengu','moth','mole','turtle','lizard'];
 const withEvo=a=>a.flatMap(k=>SP[k].evo?[k,SP[k].evo[1]]:[k]);
-const ORDER=[...withEvo(['fox','seal','bunny','bird','shroom','fly','jelly','crab',...FROST6]),'lumina','astra','marea','silva','ignis','frosta'];
+const ORDER=[...withEvo(['fox','seal','bunny','bird','shroom','fly','jelly','crab',...FROST6,...EAST10]),'lumina','monolith','astra','marea','silva','ignis','frosta'];
 const BASE8=['fox','seal','bunny','bird','shroom','fly','jelly','crab'];
-const GNAME={'노말':'거대 충격','불꽃':'거대 화염','물':'거대 해일','풀':'거대 수풀','전기':'거대 번개','얼음':'거대 빙하','땅':'거대 지진'};
+const GNAME={'노말':'거대 충격','불꽃':'거대 화염','물':'거대 해일','풀':'거대 수풀','전기':'거대 번개','얼음':'거대 빙하','땅':'거대 지진','바위':'거대 암석','독':'거대 독무'};
 const gpow=p=>p<=45?90:p<=60?110:130;
 const GMAX={
  fox:{n:'초거대 불꽃꼬리',t:'불꽃',p:140,fx:'pierce',d:'상대가 불꽃에 강해도 제대로 들어간다',pal:{a:'#ff4a24',b:'#fff6dc',c:'#fff27a'}},
@@ -387,7 +431,20 @@ TL['c']=mkTile(caveBase);
 TL['x']=[0,1].map(fr=>mkTile(f=>{caveBase(f);for(const[x,y,c]of[[2,6,'#9fe8ff'],[9,2,'#c8a0ff'],[10,10,'#9fe8ff'],[4,12,'#c8a0ff']]){f(x+1,y,2,4,c);f(x,y+2,1,2,c);f(x+3,y+1,1,3,c);f(x+1,y,1,1,'#ffffff');}if(fr)f(11,3,1,1,'#ffffff');else f(3,7,1,1,'#ffffff');}));
 TL['X']=mkTile(f=>{f(0,0,16,16,'#2a2236');f(1,1,6,5,'#3e3450');f(9,2,6,6,'#3e3450');f(2,9,7,6,'#3e3450');f(11,10,4,5,'#3e3450');f(1,1,6,1,'#5a4c70');f(9,2,6,1,'#5a4c70');f(2,9,7,1,'#5a4c70');f(12,4,1,2,'#7fd8ff');});
 TL['Sn']=mkTile(f=>{snowBase(f);f(7,9,2,6,C.trunk);f(2,2,12,8,'#20203a');f(3,3,10,6,'#c9944f');f(4,5,8,1,'#8a5f2e');f(4,7,6,1,'#8a5f2e');f(2,1,12,1,'#ffffff');});
-const MW=104,MH=96;
+/* 동부 타일: k 협곡 바닥, K 절벽, q 잔해밭(출현), j 늪 바닥, U 늪물, u 갈대(출현), z 유적 바닥, Z 유적 기둥, p 이끼 낀 균열(출현) */
+const canyonBase=f=>{f(0,0,16,16,'#c8a878');for(const[x,y]of[[3,4],[11,2],[7,11],[13,13],[2,13],[9,7]])f(x,y,2,1,'#a8885a');};
+TL['k']=mkTile(canyonBase);
+TL['K']=mkTile(f=>{f(0,0,16,16,'#7a6048');f(0,0,16,2,'#9a7a5a');f(0,5,16,1,'#5a4636');f(0,10,16,1,'#5a4636');f(3,2,1,3,'#5a4636');f(10,6,1,4,'#5a4636');f(6,11,1,5,'#5a4636');f(12,12,2,1,'#9a7a5a');});
+TL['q']=[0,1].map(fr=>mkTile(f=>{canyonBase(f);for(const[x,y]of[[2,3],[10,2],[5,10],[12,11]]){f(x,y+1,4,3,'#8a7458');f(x+1,y,2,1,'#a89070');f(x,y+3,4,1,'#5a4636');}f(fr?8:3,fr?7:14,1,1,'#ffd23a');f(fr?14:9,fr?14:6,1,1,'#fff3b0');}));
+const swampBase=f=>{f(0,0,16,16,'#5a7a4a');for(const[x,y]of[[3,4],[11,2],[7,11],[13,13],[2,13],[9,7]])f(x,y,1,1,'#4a6a3a');};
+TL['j']=mkTile(swampBase);
+TL['U']=[0,1].map(fr=>mkTile(f=>{f(0,0,16,16,'#4a5a3a');f(2,5,5,1,'#5a6a4a');f(9,11,5,1,'#5a6a4a');f(fr?4:11,fr?9:3,2,2,'#8a6aa0');f(fr?12:5,fr?2:12,1,1,'#b89ad0');}));
+TL['u']=[0,1].map(fr=>mkTile(f=>{swampBase(f);for(const[x,y]of[[0,1],[8,1],[4,9],[12,9]]){f(x+1,y+2,1,5,'#2e4a24');f(x+3,y,1,7,'#2e4a24');f(x+5,y+2,1,5,'#2e4a24');f(x+3,y-(fr?0:1)+1,1,1,'#b08ad0');f(x+1+fr,y+2,1,1,'#8aa86a');}}));
+const ruinBase=f=>{f(0,0,16,16,'#d8c090');f(0,7,16,1,'#b8a070');f(0,15,16,1,'#b8a070');f(7,0,1,7,'#b8a070');f(3,8,1,7,'#b8a070');f(12,8,1,7,'#b8a070');};
+TL['z']=mkTile(ruinBase);
+TL['Z']=mkTile(f=>{f(0,0,16,16,'#a89070');f(0,0,16,2,'#c8b088');f(1,3,14,1,'#7a6448');f(1,12,14,1,'#7a6448');f(3,4,1,8,'#7a6448');f(12,4,1,8,'#7a6448');f(6,6,4,4,'#7a6448');f(7,7,2,2,'#4ae8ff');});
+TL['p']=[0,1].map(fr=>mkTile(f=>{ruinBase(f);f(2,2,4,1,'#8a7458');f(5,3,1,3,'#8a7458');f(9,10,1,4,'#8a7458');f(10,13,3,1,'#8a7458');f(1,10,3,3,'#6a9a4a');f(11,2,3,2,'#6a9a4a');f(fr?13:4,fr?6:13,2,1,'#6a9a4a');}));
+const MW=150,MH=96;
 const MAP=[];for(let y=0;y<MH;y++)MAP.push(Array(MW).fill('.'));
 const fill=(x0,y0,x1,y1,c)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)MAP[y][x]=c;};
 const put=(list,c)=>{for(const[x,y]of list)MAP[y][x]=c;};
@@ -457,12 +514,34 @@ fill(3,60,23,60,'=');fill(3,66,23,66,'=');fill(14,56,14,66,'=');fill(36,60,61,60
 fill(2,3,4,4,'G');fill(2,5,4,5,'W');MAP[5][3]='m';fill(3,6,3,10,'=');
 for(let x=1;x<MW-1;x++)MAP[69][x]=x===42?'=':'T';for(let y=70;y<MH-1;y++)MAP[y][63]=y===88?'=':'T';
 put([[43,68],[41,76],[62,87]],'S');
+/* --- 동부 확장 (x104~148): 번개 협곡 · 천둥 마을 / 독안개 늪 / 고대 유적 --- */
+// 번개 협곡 (y1~30)
+fill(104,1,148,30,'K');fill(104,9,126,11,'k');fill(107,2,124,8,'q');fill(107,12,124,20,'q');fill(110,22,124,28,'q');fill(115,20,117,22,'k');
+put([[110,4],[116,6],[121,3],[109,15],[114,17],[120,13],[123,18],[112,25],[118,24],[122,27]],'K');
+fill(125,9,128,20,'k');fill(127,13,147,27,'k');
+bld(129,133,15,'R','W',131,'D');bld(136,138,15,'G','W',137,'m');bld(141,144,15,'H','W',142,'h');
+fill(128,19,146,19,'=');put([[131,18],[137,18],[142,18]],'=');put([[128,14],[146,14],[133,24],[146,26],[128,26]],'K');
+fill(140,27,142,30,'k');
+// 독안개 늪 (y31~62)
+fill(104,31,148,62,'T');fill(105,32,147,61,'j');
+fill(110,36,118,42,'U');fill(126,44,140,52,'U');fill(108,53,116,58,'U');
+fill(119,34,146,42,'u');fill(105,44,124,50,'u');fill(118,54,146,60,'u');
+put([[107,35],[122,38],[135,40],[145,36],[106,47],[118,46],[128,56],[140,58],[110,60]],'T');
+fill(104,33,146,33,'j');fill(141,31,141,61,'j');fill(104,50,125,50,'j');fill(125,43,125,62,'j');
+// 고대 유적 (y63~94)
+fill(104,63,148,94,'Z');fill(125,63,125,66,'z');
+fill(108,66,144,72,'z');fill(110,67,122,71,'p');fill(130,67,142,71,'p');put([[109,67],[143,67],[109,71],[143,71],[123,69],[129,69]],'Z');
+fill(110,73,114,90,'z');fill(138,73,142,90,'z');fill(110,88,142,92,'p');
+fill(120,76,132,86,'z');fill(114,80,120,80,'z');fill(132,80,138,80,'z');put([[121,77],[131,77],[121,85],[131,85]],'Z');
+// 기존 땅과의 경계(x103)와 통로 3곳
+for(let y=1;y<MH-1;y++)MAP[y][103]='T';MAP[10][103]='k';MAP[33][102]='=';MAP[33][103]='=';MAP[50][103]='s';
+put([[105,12],[130,20],[105,34],[124,64]],'S');
 fill(5,3,9,4,'R');fill(5,5,9,5,'W');MAP[5][7]='D';
 fill(21,2,27,4,'B');fill(21,5,27,5,'w');MAP[5][24]='d';
 fill(50,3,54,4,'R');fill(50,5,54,5,'W');MAP[5][52]='D';fill(52,6,52,10,'=');
 fill(57,3,59,4,'G');fill(57,5,59,5,'W');MAP[5][58]='m';fill(58,6,58,10,'=');
 put([[5,7],[9,6],[26,6],[17,12],[33,12],[49,7],[20,25],[18,31],[33,46],[15,56],[41,56],[47,59],[62,10],[65,12],[65,34],[65,52]],'S');
-const SIGNS={'43,68':'↓ 서리 고원 · 눈꽃 마을\n야생 몬스터 Lv.22~26  (별빛 배지 추천)','41,76':'눈꽃 마을\n눈이 그치지 않는 고원의 작은 마을. 동쪽 끝에 수정 동굴이 있다.','62,87':'→ 수정 동굴\n야생 몬스터 Lv.24~28 · 가장 깊은 곳에 얼음 정령이 산다고 한다.','62,10':'→ 전설의 땅\n불꽃 산 · 고대의 숲 · 심해 해안  (Lv.18~24)','65,12':'불꽃 산\n정상의 용암 고리 한가운데에 불새가 잠들어 있다고 한다.','65,34':'고대의 숲\n숲 한가운데 꽃의 공터는 전설의 사슴이 머무는 곳.','65,52':'심해 해안\n바다 위 돌길 끝, 해룡의 제단이 있다.','33,46':'↓ 모래 언덕길\n← 노을 마을 · 별빛 도시 →  야생 몬스터 Lv.14~18','15,56':'노을 마을\n바다 내음 가득한, 저녁노을이 고운 마을','41,56':'별빛 도시\n밤하늘이 가장 아름다운 도시','47,59':'별빛 체육관 · 관장 하늘\n풀과 전기의 달인 · 추천 레벨 18 이상','18,31':()=>bridgeOpen()?'전설의 섬\n다리가 열렸다. 섬에서 신비로운 기운이 느껴진다...':`전설의 섬 · 출입 금지\n도트 배지와 북부 트레이너 8명 전원 승리 시 다리가 열린다. (현재 ${MAIN_T().filter(t=>G.beaten[t.id]).length}/8명${G.badge?' · 배지 있음':''})`,'33,12':'→ 동쪽: 산들 마을\n↑ 솔바람 숲 Lv.8~11   ↓ 바위 들판 Lv.10~13','49,7':'산들 마을\n바람이 머무는 작은 마을. 센터와 상점이 있다.','20,25':'↓ 반짝 호숫가 · 갈대 벌판\n야생 몬스터 Lv.12~15 (고수 전용)','5,7':'도트 상점\n캡슐 · 회복약 · 특별한 도구 판매','9,6':'도트몬 센터\n몬스터 회복 · 캡슐 보충 · 보관함','26,6':'도트 체육관 · 관장 도윤\n추천 레벨: 10 이상','17,12':'← 서쪽 풀숲 Lv.3~6   동쪽 풀숲 Lv.6~9 →\n↑ 북쪽 풀숲 Lv.2~4   ↓ 남쪽 호숫가'};
+const SIGNS={'105,12':'→ 번개 협곡 · 천둥 마을\n야생 몬스터 Lv.26~30. 잔해밭에서 번개뿔과 뇌운이가 나온다.','130,20':'천둥 마을\n하늘에 늘 먹구름이 걸린 협곡 끝 마을. 센터와 상점이 있다.','105,34':'→ 독안개 늪\n야생 몬스터 Lv.28~32. 갈대숲을 조심할 것.','124,64':'↓ 고대 유적\n야생 몬스터 Lv.30~34. 성소에는 함부로 들어가지 말 것.','43,68':'↓ 서리 고원 · 눈꽃 마을\n야생 몬스터 Lv.22~26  (별빛 배지 추천)','41,76':'눈꽃 마을\n눈이 그치지 않는 고원의 작은 마을. 동쪽 끝에 수정 동굴이 있다.','62,87':'→ 수정 동굴\n야생 몬스터 Lv.24~28 · 가장 깊은 곳에 얼음 정령이 산다고 한다.','62,10':'→ 전설의 땅\n불꽃 산 · 고대의 숲 · 심해 해안  (Lv.18~24)','65,12':'불꽃 산\n정상의 용암 고리 한가운데에 불새가 잠들어 있다고 한다.','65,34':'고대의 숲\n숲 한가운데 꽃의 공터는 전설의 사슴이 머무는 곳.','65,52':'심해 해안\n바다 위 돌길 끝, 해룡의 제단이 있다.','33,46':'↓ 모래 언덕길\n← 노을 마을 · 별빛 도시 →  야생 몬스터 Lv.14~18','15,56':'노을 마을\n바다 내음 가득한, 저녁노을이 고운 마을','41,56':'별빛 도시\n밤하늘이 가장 아름다운 도시','47,59':'별빛 체육관 · 관장 하늘\n풀과 전기의 달인 · 추천 레벨 18 이상','18,31':()=>bridgeOpen()?'전설의 섬\n다리가 열렸다. 섬에서 신비로운 기운이 느껴진다...':`전설의 섬 · 출입 금지\n도트 배지와 북부 트레이너 8명 전원 승리 시 다리가 열린다. (현재 ${MAIN_T().filter(t=>G.beaten[t.id]).length}/8명${G.badge?' · 배지 있음':''})`,'33,12':'→ 동쪽: 산들 마을\n↑ 솔바람 숲 Lv.8~11   ↓ 바위 들판 Lv.10~13','49,7':'산들 마을\n바람이 머무는 작은 마을. 센터와 상점이 있다.','20,25':'↓ 반짝 호숫가 · 갈대 벌판\n야생 몬스터 Lv.12~15 (고수 전용)','5,7':'도트 상점\n캡슐 · 회복약 · 특별한 도구 판매','9,6':'도트몬 센터\n몬스터 회복 · 캡슐 보충 · 보관함','26,6':'도트 체육관 · 관장 도윤\n추천 레벨: 10 이상','17,12':'← 서쪽 풀숲 Lv.3~6   동쪽 풀숲 Lv.6~9 →\n↑ 북쪽 풀숲 Lv.2~4   ↓ 남쪽 호숫가'};
 const TRAINERS=[
  {id:'seoyeon',name:'꼬마 서연',x:4,y:12,dir:'up',pal:{c:'#ff8fb1',a:'#ffffff',h:'#2a1a12'},team:[['bird',4],['shroom',4]],hello:'눈이 마주쳤으니 승부야! 내 몬스터 귀엽지?',lose:'우와, 너 정말 강하다!',after:'풀숲 안쪽엔 해파링도 산대.'},
  {id:'jiho',name:'곤충소년 지호',x:14,y:5,dir:'down',pal:{c:'#3aa04a',a:'#e6c229',h:'#3a2a10'},team:[['fly',3],['fly',4],['fly',4]],hello:'반딧벌의 찌릿찌릿 맛 좀 볼래?',lose:'내 반딧벌들이 전부 지다니...',after:'전기 기술은 물 타입에게 효과가 굉장해.'},
@@ -479,7 +558,10 @@ TRAINERS.push(
  {id:'sua',extra:true,giant:true,name:'엘리트 수아',x:48,y:54,dir:'down',pal:{c:'#ffffff',a:'#1f2a5a',h:'#c9a227'},team:[['jelly',16],['crab',17],['bird',17],['fly',18]],hello:'별빛 도시에 들어가려면 내 시험을 통과해야 해!',lose:'합격이야. 별빛 체육관에서 기다릴게.',after:'관장 하늘님은 불꽃 타입에 약한 몬스터가 많아.'},
  {id:'yujin',extra:true,name:'스키어 유진',x:12,y:82,dir:'right',pal:{c:'#e04848',a:'#ffffff',h:'#2a1a12'},team:[['snowy',23],['pengu',24],['moth',24]],hello:'눈밭에선 내가 제일 빨라! 승부다!',lose:'으앗, 눈밭에서 미끄러졌어...',after:'얼음 타입은 불꽃 기술에 약해. 대신 풀이랑 땅 타입엔 강하지!'},
  {id:'cheolmin',extra:true,name:'광부 철민',x:68,y:86,dir:'down',pal:{c:'#e6c229',a:'#5a4a3a',h:'#222222'},team:[['mole',25],['lizard',25],['turtle',26]],hello:'수정 캐러 왔다가 트레이너를 캐냈군! 덤벼라!',lose:'허허, 곡괭이보다 단단한 녀석이로구먼.',after:'땅 타입엔 물이나 풀 기술이 잘 통하지. 전기는 영 안 먹혀.'},
- {id:'sea',extra:true,giant:true,name:'얼음 탐험가 세아',x:89,y:84,dir:'up',pal:{c:'#9fe8ff',a:'#3a4a8a',h:'#f0f0f0'},team:[['moth',26],['turtle',27],['pengu',27],['lizard',28]],hello:'동굴 깊은 곳의 정령을 만나려면 내 실력부터 넘어 봐!',lose:'대단해... 정령도 너를 인정할 거야.',after:'고원과 동굴의 몬스터 6종을 모두 잡으면 가장 깊은 방에 설령이 나타난대.'});
+ {id:'sea',extra:true,giant:true,name:'얼음 탐험가 세아',x:89,y:84,dir:'up',pal:{c:'#9fe8ff',a:'#3a4a8a',h:'#f0f0f0'},team:[['moth',26],['turtle',27],['pengu',27],['lizard',28]],hello:'동굴 깊은 곳의 정령을 만나려면 내 실력부터 넘어 봐!',lose:'대단해... 정령도 너를 인정할 거야.',after:'고원과 동굴의 몬스터 6종을 모두 잡으면 가장 깊은 방에 설령이 나타난대.'},
+ {id:'uram',extra:true,name:'등반가 우람',x:118,y:11,dir:'left',pal:{c:'#c0392b',a:'#5a4a3a',h:'#222'},team:[['goat',28],['pebble',28],['cloud',29]],hello:'협곡 바람을 이겨 낸 내 몬스터들을 봐라!',lose:'허, 절벽에서 미끄러진 기분이군.',after:'바위 타입은 불꽃·얼음에 강하지만 물이랑 풀엔 약해.'},
+ {id:'soi',extra:true,name:'늪지 탐험가 소이',x:130,y:34,dir:'up',pal:{c:'#6a8a3a',a:'#a05ac8',h:'#3a1f10'},team:[['toad',30],['snake',30],['frog',31]],hello:'안개 속에서 길 잃었지? 나랑 겨루면 길을 알려 줄게!',lose:'안개가 걷힌 것 같아...',after:'독 타입은 풀에 강하지만 땅이랑 바위엔 잘 안 통해.'},
+ {id:'hangyeol',extra:true,giant:true,name:'고고학자 한결',x:140,y:75,dir:'down',pal:{c:'#d8c090',a:'#6a4a2a',h:'#cccccc'},team:[['stonecat',32],['raptor',33],['lantern',33],['boulder',34]],hello:'유적의 비밀은 아무에게나 알려 줄 수 없지!',lose:'자네라면 성소의 수호자를 만나도 되겠어.',after:'성소의 모노리스는 배지 두 개를 가진 자 앞에서 깨어난다네.'});
 const MAIN_T=()=>TRAINERS.filter(t=>!t.extra);
 const VILLAGERS=[
  {name:'마을 아저씨',x:11,y:8,dir:'down',pal:{c:'#6b8e23',a:'#d9c27a',h:'#555'},lines:['도윤 관장은 마지막에 퐁당이를 내보내지. 풀이나 전기 기술로 맞서 봐!','그러고 보니 오늘 새벽, 체육관 동쪽 구석에서 반짝이는 무언가를 봤단다. 전설의 루미나일지도 몰라!']},
@@ -489,6 +571,8 @@ const VILLAGERS=[
  {name:'노을 마을 소녀',x:12,y:64,dir:'left',pal:{c:'#ff8fb1',a:'#ffffff',h:'#5a3a22'},lines:['도감을 다 채우면 무슨 일이 일어날까? 궁금해!']},
  {name:'별빛 시장님',x:40,y:61,dir:'down',pal:{c:'#222',a:'#3a3a6a',h:'#999'},lines:['별빛 도시에 어서 오게. 이 도시엔 두 번째 체육관이 있지.','관장 하늘을 이기면 별빛 배지를 받을 수 있다네.']},
  {name:'연구원',x:47,y:61,dir:'right',pal:{c:'#ffffff',a:'#e8e8f0',h:'#3a3a3a'},lines:['거대화는 3턴 동안만 유지돼. 상대가 거대화하면 교체로 버티는 것도 방법이야.','곳곳의 돌무더기에서 빛기둥이 솟는 걸 봤어? 레이드 둥지야! 지원 트레이너들과 10턴 안에 거대 보스를 쓰러뜨리면 잡을 기회가 생겨.','심해 해안 모래밭엔 황금빛 전설의 둥지가 있대. 전설의 몬스터를 동료로 맞이한 트레이너에게만 반응한다나 봐.','초거대화 기술은 타입이 같을 때만 전용 기술로 바뀌지.']},
+ {name:'천둥 마을 아이',x:134,y:21,dir:'down',pal:{c:'#ffd23a',a:'#3a6fd8',h:'#3a2a10'},lines:['하늘에 뇌운이가 떠다니면 곧 번개가 쳐! 번개뿔들이 그걸 뿔에 모은대.','남쪽 독안개 늪엔 독 타입이 많아. 땅 기술이 잘 통하지!']},
+ {name:'유적 연구원',x:144,y:22,dir:'left',pal:{c:'#ffffff',a:'#8a6a3a',h:'#555'},lines:['더 남쪽 고대 유적 한가운데엔 거대한 돌기둥이 서 있어.','배지 두 개를 가진 트레이너가 다가가면 깨어난다는 전설이 있지. 바위 타입엔 물·풀·땅 기술이 잘 통해.']},
  {name:'눈꽃 할머니',x:34,y:76,dir:'down',pal:{c:'#c0392b',a:'#f0e0c0',h:'#eee'},lines:['눈꽃 마을에 잘 왔다. 손이 꽁꽁 얼었구나.','깊은 눈밭에선 눈뭉치와 펭글이, 동굴 수정밭에선 흙두더와 수정등이가 나온단다.']},
  {name:'얼음낚시꾼',x:48,y:77,dir:'left',pal:{c:'#2f5fa8',a:'#7a8f3a',h:'#555'},lines:['남쪽 얼음 호수에서 낚시 중이야. 오늘도 꽝이지만!','서쪽 돌무더기 둥지에서 빛기둥이 솟는 걸 봤어. 아주 강한 녀석이 있을 거야.']},
  {name:'별빛 소년',x:58,y:67,dir:'up',pal:{c:'#3aa04a',a:'#e6c229',h:'#3a2a10'},lines:['밤마다 하늘에서 아스트라가 보인대! 진짜일까?','그리고 동쪽 고대의 숲 깊은 곳엔 도감 8종을 모두 채운 사람만 만날 수 있는 사슴이 산대!']}
@@ -500,6 +584,7 @@ const HOUSES={
  '58,59':{t:'천문학자: 별을 보다 보면 거대화 에너지가 느껴져. 이걸로 강한 몬스터를 잡아 봐!',gift:['superball',3]},
  '38,65':{t:'"별빛 도시 야경 봤어? 밤이 되면 도시 전체가 반짝여!"'},
  '45,65':{t:'약사 언니: 트레이너라면 부활초는 필수지! 두 개 챙겨 줄게.',gift:['revive',2]},
+ '142,17':{t:'천둥 마을 촌장: 협곡을 넘어온 용기에 상을 주마. 이걸 먹이면 한 단계 더 강해질 게다.',gift:['jelly',1]},
  '51,73':{t:'산악 구조대원: 이 추위에 여기까지 오다니! 몸 녹이는 데 이게 최고야.',gift:['superpotion',3]},
  '55,65':{t:'"관장 하늘님은 마지막에 새순이를 초거대화시킨대. 불꽃 타입으로 맞서 봐!"'}
 };
@@ -519,6 +604,9 @@ const LEGENDS=[
  {sp:'ignis',x:84,y:4,lv:35,cond:()=>!!(G&&G.badge&&G.badge2&&G.lc&&G.lc.astra),place:'불꽃 산 정상',spark:'#ffb03a',cry:[330,392,494,587,784,988],bg:['#3a0f12','#5a1a16','#7a2a18','#a8461e','#8a3a1e','#c8642e'],
   unlock:'...하늘이 붉게 타오른다! 동쪽 전설의 땅, 불꽃 산 정상에서 불새의 울음소리가 들려왔다.',
   near:'...뜨거운 바람이 몰아친다. 바위들이 붉게 달아오른다.',roar:'키야아아아악──!',appear:'불꽃 기둥을 뚫고 전설의 불새 이그나가 날아올랐다!',gone:'불꽃이 되어 하늘 높이 날아갔다'},
+ {sp:'monolith',x:126,y:79,lv:40,cond:()=>!!(G&&G.badge2),place:'고대 유적 중심 성소',spark:'#4ae8ff',cry:[110,131,147,110,98,82],bg:['#2a2238','#3a3050','#4a4068','#6a5a80','#5a4a70','#c8a868'],
+  unlock:'...땅이 낮게 울린다. 동쪽 끝 고대 유적의 성소에서 돌기둥이 깨어나려 한다!',
+  near:'...발밑 돌바닥의 문양이 하나씩 빛나기 시작했다.',roar:'우르르르릉──!',appear:'흙먼지를 털고 고대의 수호자 모노리스가 일어섰다!',gone:'문양의 빛과 함께 땅속으로 가라앉았다'},
  {sp:'frosta',x:97,y:82,lv:36,cond:()=>!!(G&&FROST6.every(k=>G.caught[k])),place:'수정 동굴 가장 깊은 방',spark:'#bfefff',cry:[880,784,659,880,1046,1318],bg:['#0e1a33','#142748','#1c3a64','#2a5280','#3a6a9a','#8fc8e8'],
   unlock:'...발밑에서 찬 기운이 올라온다! 최남단 수정 동굴 깊은 곳에서 눈보라 소리가 들려왔다.',
   near:'...숨이 하얗게 얼어붙는다. 수정들이 일제히 빛나기 시작했다.',roar:'후우우우우웅──!',appear:'눈보라를 가르며 얼음의 정령 설령이 날개를 펼쳤다!',gone:'눈송이가 되어 동굴 속으로 흩어졌다'}
@@ -529,7 +617,9 @@ const RAIDS=[
  {id:'r3',name:'모래 언덕 둥지',x:30,y:52,lv:25,stars:3,pool:['fox','seal','bunny','crab','jelly'],color:'#c86bff'},
  {id:'r4',name:'심해 해안 둥지',x:100,y:47,lv:30,stars:4,pool:['fox','seal','bunny','bird','shroom','fly','jelly','crab'],color:'#4ad8ff'},
  {id:'r5',name:'전설의 둥지',x:80,y:48,lv:38,stars:5,legend:true,turns:12,pool:[],color:'#ffd23a'},
- {id:'r6',name:'서리 고원 둥지',x:20,y:82,lv:33,stars:4,pool:FROST6,color:'#9fe8ff'}
+ {id:'r6',name:'서리 고원 둥지',x:20,y:82,lv:33,stars:4,pool:FROST6,color:'#9fe8ff'},
+ {id:'r7',name:'독안개 둥지',x:122,y:47,lv:36,stars:4,pool:['toad','snake','wasp','frog','goat','cloud'],color:'#c86bff'},
+ {id:'r8',name:'고대 유적 둥지',x:116,y:69,lv:40,stars:5,pool:['pebble','stonecat','raptor','lantern'],color:'#4ae8ff'}
 ];
 const raidPool=R=>R.legend?LEGENDS.map(L=>L.sp).filter(k=>G&&G.lc[k]):R.pool;
 const denAt=(x,y)=>RAIDS.find(R=>R.x===x&&R.y===y);
@@ -537,7 +627,7 @@ const denOn=R=>!!(G&&G.badge&&!G.rd[R.id]&&raidPool(R).length);
 const legendHere=L=>!!(G&&L.cond()&&!G.lc[L.sp]&&!G.lg[L.sp]);
 const legendAt=(x,y)=>LEGENDS.find(L=>L.x===x&&L.y===y&&legendHere(L));
 const tileAt=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?'T':(x===16&&y>=32&&y<=34&&bridgeOpen())?'b':MAP[y][x];
-const walkable=t=>t==='.'||t===','||t==='='||t==='*'||t==='s'||t==='b'||t==='V'||t==='A'||t==='n'||t==='N'||t==='I'||t==='c'||t==='x';
+const walkable=t=>t==='.'||t===','||t==='='||t==='*'||t==='s'||t==='b'||t==='V'||t==='A'||t==='n'||t==='N'||t==='I'||t==='c'||t==='x'||t==='k'||t==='q'||t==='j'||t==='u'||t==='z'||t==='p';
 
 /* ================= state ================= */
 let G=null;
@@ -672,12 +762,12 @@ modes.starter={i:0,busy:false,enter(){this.i=0;this.busy=false;},
 /* ---------- first-person view (grid raycaster) ---------- */
 const ANG={right:0,down:Math.PI/2,left:Math.PI,up:-Math.PI/2};
 const FPN=120,FPV=176,ZB=new Float32Array(FPN);
-const FLATS=new Set(['~','L']);   // 막혀 있지만 바닥처럼 보이는 타일(물·용암)
-const WALLH={T:1.7,Y:1.7,X:2.2,R:1.5,B:1.5,G:1.5,H:1.5,P:1.5,r:.6,S:.55};
+const FLATS=new Set(['~','L','U']);   // 막혀 있지만 바닥처럼 보이는 타일(물·용암)
+const WALLH={T:1.7,Y:1.7,X:2.2,K:2,Z:1.8,R:1.5,B:1.5,G:1.5,H:1.5,P:1.5,r:.6,S:.55};
 const RGBC={};const rgbOf=c=>RGBC[c]||(RGBC[c]=[parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)]);
 const FLOORC=Object.assign({},null);
 function skyOf(x,y){const r=regionName(x,y);
-  return r==='불꽃 산'?['#5a1e22','#c8603a','#e8885a']:r==='수정 동굴'?['#0e0a18','#1e1830','#2a2236']:(r==='서리 고원'||r==='눈꽃 마을')?['#9cc0e4','#dceaf8','#eef4fb']
+  return (r==='번개 협곡'||r==='천둥 마을')?['#3a3f5a','#7a809a','#a8aec0']:r==='독안개 늪'?['#3a4a3a','#7a8a6a','#a8b498']:r==='고대 유적'?['#c89858','#f0d0a0','#f6e2c0']:r==='불꽃 산'?['#5a1e22','#c8603a','#e8885a']:r==='수정 동굴'?['#0e0a18','#1e1830','#2a2236']:(r==='서리 고원'||r==='눈꽃 마을')?['#9cc0e4','#dceaf8','#eef4fb']
    :r==='고대의 숲'?['#4a90b8','#a8d8c8','#c8e8d0']:r==='심해 해안'?['#4aa0e0','#bfe6ff','#d8f0ff']:['#5ab0f0','#a8dcff','#cfeeff'];}
 let FPF=null,FPFD=null,DENIMG=null;
 function denImg(){if(DENIMG)return DENIMG;DENIMG=mkTile(f=>{f(1,11,14,4,'#3a2f3f');for(const[sx,sy]of[[0,8],[11,8],[2,11],[10,11],[5,4]]){f(sx,sy,5,5,'#6d6a78');f(sx,sy,5,1,'#a5a2b0');}});return DENIMG;}
@@ -731,7 +821,7 @@ function drawFP(rx,ry){
     const L=s.extra.L;if(L)for(let k=0;k<8;k++){const a=frame/22+k*Math.PI/4;if((frame>>2)%8!==k)rect(cxs+Math.cos(a)*sw*.7,top+sh/2+Math.sin(a)*sh*.5,2,2,L.spark);}
     const tr=s.extra.tr;if(tr&&tr.alert>0){tr.alert--;const bx=Math.round(cxs-5),by=Math.round(top-14);rect(bx,by,10,12,INK);rect(bx+1,by+1,8,10,'#ffffff');rect(bx+4,by+2,3,5,'#e5483f');rect(bx+4,by+8,3,2,'#e5483f');}}
   // 발밑 풀숲
-  const T0=tileAt(P.x,P.y);if(vw==='fp'&&!P.moving&&(T0===','||T0==='N'||T0==='x'||T0==='A')){let im=TL[T0];if(Array.isArray(im))im=im[gf];for(let x=0;x<W;x+=32)ctx.drawImage(im,0,6,16,10,x,H-20,32,20);}
+  const T0=tileAt(P.x,P.y);if(vw==='fp'&&!P.moving&&(T0===','||T0==='N'||T0==='x'||T0==='A'||T0==='q'||T0==='u'||T0==='p')){let im=TL[T0];if(Array.isArray(im))im=im[gf];for(let x=0;x<W;x+=32)ctx.drawImage(im,0,6,16,10,x,H-20,32,20);}
   // 미니맵 + 방위
   {const R=7,cs=3,mw=(R*2+1)*cs,mx0=W-mw-4,my0=4;rect(mx0-1,my0-1,mw+2,mw+2,'rgba(32,32,58,.85)');
    for(let yy=-R;yy<=R;yy++)for(let xx=-R;xx<=R;xx++){const t=tileAt(P.x+xx,P.y+yy);rect(mx0+(xx+R)*cs,my0+(yy+R)*cs,cs,cs,t==='b'?'#a8743f':MINI_C[t]||'#8ccf63');}
@@ -767,7 +857,7 @@ modes.world={lock:false,cool:0,lastBump:0,enter(){this.lock=false;},
   else if(frame-this.lastBump>16){sfx.bump();this.lastBump=frame;}},
  onStep(){const T0=tileAt(P.x,P.y);if(T0==='A'&&Math.random()<.11){encounter();return true;}const rg=regionName(P.x,P.y);if(rg!==this.region){if(this.region)this.toast=110;this.region=rg;}
   for(const tr of TRAINERS){if(G.beaten[tr.id])continue;const[dx,dy]=DV[tr.dir];for(let i=1;i<=4;i++){const x=tr.x+dx*i,y=tr.y+dy*i;if(x===P.x&&y===P.y){trainerSpot(tr,true);return true;}if(!walkable(tileAt(x,y))||npcAt(x,y))break;}}
-  {const T1=tileAt(P.x,P.y);if((T1===','||T1==='N'||T1==='x')&&Math.random()<.11){encounter();return true;}}return false;},
+  {const T1=tileAt(P.x,P.y);if((T1===','||T1==='N'||T1==='x'||T1==='q'||T1==='u'||T1==='p')&&Math.random()<.11){encounter();return true;}}return false;},
  async interact(x,y){const t=tileAt(x,y),tr=npcAt(x,y);
   {const L=legendAt(x,y);if(L){this.lock=true;await legendEvent(L);return;}}
   {const R=denAt(x,y);if(R){this.lock=true;const st=await denEvent(R);if(!st){this.lock=false;this.cool=20;}return;}}
@@ -905,9 +995,10 @@ async function trainerSpot(tr,seen){const w=modes.world;w.lock=true;
   if(seen){tr.alert=36;beep(1200,.08);beep(1500,.1,'square',.04,.08);await wait(36);tr.dir=P.x>tr.x?'right':P.x<tr.x?'left':P.y>tr.y?'down':'up';P.dir={up:'down',down:'up',left:'right',right:'left'}[tr.dir];}
   await msg(`${tr.name}: ${tr.hello}`);
   startBattle({trainer:tr.name,giant:!!tr.giant,team:tr.team.map(([s,l])=>mkMon(s,l)),onWin:async()=>{G.beaten[tr.id]=1;await msg(`${tr.name}: ${tr.lose}`);}});}
-function regionName(x,y){if(y>=70)return x>=63?'수정 동굴':(x>=30&&x<=58&&y<=78)?'눈꽃 마을':'서리 고원';if(x>=63)return y<=21?'불꽃 산':y<=45?'고대의 숲':'심해 해안';if(y>=46){if(y<=55)return '모래 언덕길';return x<30?'노을 마을':'별빛 도시';}if(y>=24)return x>=32?'갈대 벌판':'반짝 호숫가';if(x>=48&&y<=10)return '산들 마을';if(x>=32)return y<11?'솔바람 숲':'바위 들판';return '도트 마을';}
+function regionName(x,y){if(x>=104)return y<=30?((x>=127&&y>=13&&y<=27)?'천둥 마을':'번개 협곡'):y<=62?'독안개 늪':'고대 유적';if(y>=70)return x>=63?'수정 동굴':(x>=30&&x<=58&&y<=78)?'눈꽃 마을':'서리 고원';if(x>=63)return y<=21?'불꽃 산':y<=45?'고대의 숲':'심해 해안';if(y>=46){if(y<=55)return '모래 언덕길';return x<30?'노을 마을':'별빛 도시';}if(y>=24)return x>=32?'갈대 벌판':'반짝 호숫가';if(x>=48&&y<=10)return '산들 마을';if(x>=32)return y<11?'솔바람 숲':'바위 들판';return '도트 마을';}
 function wildFor(x,y){let list,lo,hi;
-  if(y>=70){if(x>=63){list=[['mole',3],['drillmole',.4],['turtle',2],['lizard',2],['moth',1],['fly',1]];lo=24;hi=28;}else{list=[['snowy',3],['snowboss',.4],['pengu',2],['moth',2],['lizard',1],['bird',1]];lo=22;hi=26;}}
+  if(x>=104){if(y<=30){list=[['goat',3],['cloud',3],['pebble',2],['fly',1],['raptor',.5]];lo=26;hi=30;}else if(y<=62){list=[['toad',3],['frog',3],['snake',2],['wasp',2],['jelly',1],['toadking',.3]];lo=28;hi=32;}else{list=[['stonecat',3],['lantern',2],['raptor',2],['pebble',2],['boulder',.4]];lo=30;hi=34;}}
+  else if(y>=70){if(x>=63){list=[['mole',3],['drillmole',.4],['turtle',2],['lizard',2],['moth',1],['fly',1]];lo=24;hi=28;}else{list=[['snowy',3],['snowboss',.4],['pengu',2],['moth',2],['lizard',1],['bird',1]];lo=22;hi=26;}}
   else if(x>=63){if(y<=21){list=[['crab',3],['fox',2],['fly',2],['bird',1],['voltfly',.4],['stormhawk',.4]];lo=18;hi=22;}else if(y<=45){list=[['shroom',3],['bunny',2],['fly',2],['bird',2],['shroomking',.4]];lo=18;hi=22;}else{list=[['jelly',3],['seal',3],['crab',1],['bird',1]];lo=20;hi=24;}}
   else if(y>=46){list=[['fox',2],['seal',2],['bunny',2],['crab',2],['jelly',2],['fly',2],['shroom',1],['bird',1]];lo=14;hi=18;}
   else if(y>=24){list=[['jelly',3],['seal',2],['bunny',2],['fox',2],['crab',2],['fly',2]];lo=12;hi=15;}
@@ -967,7 +1058,7 @@ async function worldBag(){let i=0;
     if(pr){await msg(pr);continue;}await applyItem(k,m);}}
 
 /* world map overlay */
-const MINI_C={'L':'#e04a1e','V':'#5a4038','A':'#3a2620','H':'#9a6a3a','h':'#7a4a2a','P':'#8a5ad0','v':'#f3eee2','e':'#7a4a2a','.':'#8ccf63','*':'#8ccf63',',':'#3d8636','T':'#1d4f2a','~':'#3f95d8','=':'#e8d29a','s':'#f0dca0','r':'#8a8f99','R':'#d4504c','G':'#3fa66a','B':'#4a72cf','W':'#f3eee2','w':'#f3eee2','D':'#7a4a2a','d':'#7a4a2a','m':'#7a4a2a','S':'#c9944f','n':'#eef4fb','N':'#8fb0c4','Y':'#1f5a3a','I':'#bfe6f5','c':'#5a4c70','x':'#9fe8ff','X':'#2a2236'};
+const MINI_C={'L':'#e04a1e','V':'#5a4038','A':'#3a2620','H':'#9a6a3a','h':'#7a4a2a','P':'#8a5ad0','v':'#f3eee2','e':'#7a4a2a','.':'#8ccf63','*':'#8ccf63',',':'#3d8636','T':'#1d4f2a','~':'#3f95d8','=':'#e8d29a','s':'#f0dca0','r':'#8a8f99','R':'#d4504c','G':'#3fa66a','B':'#4a72cf','W':'#f3eee2','w':'#f3eee2','D':'#7a4a2a','d':'#7a4a2a','m':'#7a4a2a','S':'#c9944f','n':'#eef4fb','N':'#8fb0c4','Y':'#1f5a3a','I':'#bfe6f5','c':'#5a4c70','x':'#9fe8ff','X':'#2a2236','k':'#c8a878','K':'#7a6048','q':'#a89070','j':'#5a7a4a','U':'#4a5a3a','u':'#3e5e30','z':'#d8c090','Z':'#a89070','p':'#9aa870'};
 let MINI=null;
 function showMap(){if(!MINI){MINI=document.createElement('canvas');MINI.width=MW;MINI.height=MH;const g=MINI.getContext('2d');for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){g.fillStyle=MINI_C[MAP[y][x]]||'#8ccf63';g.fillRect(x,y,1,1);}}
   return new Promise(res=>{const o={update(){if(pressed.has('a')||pressed.has('b')){sfx.back();closeOv(o);res();}},
@@ -978,7 +1069,7 @@ function showMap(){if(!MINI){MINI=document.createElement('canvas');MINI.width=MW
     if((frame>>3)%2){rect(ox+P.x*s-1,oy+P.y*s-1,5,5,'#ffffff');rect(ox+P.x*s,oy+P.y*s,3,3,'#e5483f');}
     const ly=oy+MH*s+3,lx=4;rect(lx,ly+4,5,5,'#e5483f');text('나',lx+7,ly,'#cfe3dc',6.5);rect(lx+20,ly+4,5,5,'#ffd23a');text('트레이너',lx+27,ly,'#cfe3dc',6.5);rect(lx+62,ly+4,5,5,'#c58cff');text('전설',lx+69,ly,'#cfe3dc',6.5);
     const nb=(G.badge?1:0)+(G.badge2?1:0),stl=`배지 ${nb}/2 · 도감 ${ORDER.filter(k=>G.caught[k]).length}/${ORDER.length} · 트레이너 ${TRAINERS.filter(t=>G.beaten[t.id]).length}/${TRAINERS.length}`;text(stl,W-4-measure(stl,6.5),ly,'#ffd23a',6.5);
-    for(const[nmT,x,y]of[['도트',8,3],['산들',53,2],['노을',10,58],['별빛',46,58],['불꽃 산',76,12],['고대의 숲',74,24],['심해 해안',72,47],['눈꽃',32,76],['수정 동굴',72,76]])text(nmT,ox+x*s,oy+y*s,'#ffffff',6.5);}};overlays.push(o);});}
+    for(const[nmT,x,y]of[['도트',8,3],['산들',53,2],['노을',10,58],['별빛',46,58],['불꽃 산',76,12],['고대의 숲',74,24],['심해 해안',72,47],['눈꽃',32,76],['수정 동굴',72,76],['천둥',129,11],['독안개 늪',108,38],['고대 유적',110,75]])text(nmT,ox+x*s,oy+y*s,'#ffffff',6.5);}};overlays.push(o);});}
 
 /* party screen overlay */
 function pickParty({title='몬스터',cancel=true,swap=false}={}){return new Promise(res=>{const o={i:0,sel:-1,
@@ -1043,7 +1134,7 @@ modes.battle={
   if(RLg){const c=RLg.bg;rect(-4,-4,W+8,134,c[0]);rect(-4,26,W+8,22,c[1]);rect(-4,48,W+8,22,c[2]);rect(-4,70,W+8,60,c[3]);for(let i=0;i<16;i++){const x=(i*41+frame)%W,y=(i*17)%66;rect(x,y,1,3,i%2?'#ffd23a':RLg.spark);}}
   else if(Bt.raid){rect(-4,-4,W+8,134,'#2a1838');rect(-4,26,W+8,22,'#3a2050');rect(-4,48,W+8,22,'#4a2a66');rect(-4,70,W+8,60,'#5a4a6a');const rc=Bt.raid.R.color;for(let i=0;i<10;i++){const x=(i*41+frame)%W,y=(i*17)%60;rect(x,y,1,3,rc);}}
   else if(Bt.legend){const c=Bt.legend.bg;rect(-4,-4,W+8,134,c[0]);rect(-4,26,W+8,22,c[1]);rect(-4,48,W+8,22,c[2]);rect(-4,70,W+8,60,c[3]);for(let i=0;i<24;i++){const x=(i*53)%W,y=(i*29)%66;if(((frame>>3)+i)%5)rect(x,y,1,1,'#ffffff');}}
-  const FB=P.y>=70?(P.x>=63?['#1e1830','#2a2240','#362c52','#4a4058','#3a3248','#5a4c70','#7fd8ff']:['#e8f2ff','#dbeaff','#cfe2fb','#f4f8ff','#c8d8ea','#e0ecf8','#b8cce0']):null;
+  const RGN=regionName(P.x,P.y),FB={'수정 동굴':['#1e1830','#2a2240','#362c52','#4a4058','#3a3248','#5a4c70','#7fd8ff'],'서리 고원':['#e8f2ff','#dbeaff','#cfe2fb','#f4f8ff','#c8d8ea','#e0ecf8','#b8cce0'],'눈꽃 마을':['#e8f2ff','#dbeaff','#cfe2fb','#f4f8ff','#c8d8ea','#e0ecf8','#b8cce0'],'번개 협곡':['#4a4e6a','#6a6e88','#8a8ea8','#b8a078','#8a7858','#a89070','#7a6a50'],'천둥 마을':['#4a4e6a','#6a6e88','#8a8ea8','#b8a078','#8a7858','#a89070','#7a6a50'],'독안개 늪':['#4a5a4a','#6a7a62','#8a9a7a','#5a7a4a','#3a5a3a','#5a7a4a','#3a6a3a'],'고대 유적':['#e8c890','#f0d8a8','#f6e6c0','#d8c090','#b8a070','#d0b888','#a89060']}[RGN]||null;
   if(!RLg&&!Bt.raid&&!Bt.legend){const c=FB||['#cfeeff','#bfe6fb','#b2dff6','#a6d87c'];rect(-4,-4,W+8,134,c[0]);rect(-4,26,W+8,22,c[1]);rect(-4,48,W+8,22,c[2]);rect(-4,70,W+8,60,c[3]);}
   {const tc=FB&&!Bt.raid&&!Bt.legend?FB[6]:'#8fc466';for(let x=0;x<W;x+=24)rect(x+(x%48?6:14),80+(x%72)/6,3,1,tc);for(let x=10;x<W;x+=30)rect(x,104+(x%60)/10,4,1,tc);}
   {const p1=Bt.raid?'#3a2f4a':Bt.legend?Bt.legend.bg[4]:FB?FB[4]:'#7fb85a',p2=Bt.raid?'#6d5a80':Bt.legend?Bt.legend.bg[5]:FB?FB[5]:'#94cc6c';ellipse(178,62,40,8,p1);ellipse(178,61,38,7,p2);ellipse(64,118,46,9,p1);ellipse(64,117,44,8,p2);}
