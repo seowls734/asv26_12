@@ -358,10 +358,37 @@ SP.monolith={n:'모노리스',t:'바위',hp:110,atk:92,def:110,spd:60,exp:260,ra
   d:'고대 유적 한가운데 서 있던 거대한 돌기둥. 몸의 문양이 빛나면 땅이 울리며 깨어난다.',pal:{k:'#1a1a24',a:'#6a6a80',b:'#9a9ab0',c:'#4ae8ff',w:'#ffd23a'},
   px:["....kkkk....","...kbbbbk...","..kbaaaabk..","..kawccwak..","..kaaaaaak..","kkkacaacakkk","kbbaaccaabbk","kaakaaaakaak",".k.kacaak.k.","...kaaaak...","...kakkak...","..kkk..kkk.."]};
 const EAST10=['pebble','stonecat','raptor','goat','cloud','toad','snake','wasp','frog','lantern'];
+/* --- 지역 전설 12종: 각 지역(마을·들판)마다 한 마리씩 --- */
+const LG=(id,n,t,st,learn,d,pal,px)=>{SP[id]={n,t,hp:st[0],atk:st[1],def:st[2],spd:st[3],exp:200,rate:.18,legend:true,learn,d,pal,px};};
+LG('whirl','휘오리','노말',[80,82,72,96],[[1,'gust'],[1,'tackle'],[20,'skydive'],[26,'starfall']],'솔바람 숲의 소나무 사이를 맴도는 회오리 정령. 지나간 자리에 솔잎 향이 남는다.',{k:'#1e2a3a',a:'#e8f4f0',b:'#9ad8c8',c:'#5ab8a0',w:'#ffd23a'},
+  ["..cc....cc..",".cbbc..cbbc.","..kkkkkkkk..",".kaaaaaaaak.",".kawkaakwak.","ckaaaabaaakc","cbkaaaaaakbc",".cbkaaaakbc.","..cbkaakbc..","...cbkkbc...","....cbbc....",".....cc....."]);
+LG('dolttan','돌탄','바위',[100,90,100,50],[[1,'rock'],[1,'tackle'],[20,'slide'],[28,'ancient']],'바위 들판의 바위들을 하나로 모아 만든 곰. 겨울이면 바위 사이에서 깊은 잠을 잔다.',{k:'#1e1a14',a:'#8a7c64',b:'#c8bca0',c:'#e5a23a',w:'#ffffff'},
+  [".kk......kk.","kaak....kaak","kaaakkkkaaak",".kaaaaaaaak.",".kacaaaacak.",".kaaabbaaak.","kkaabkkbaakk","kbkaaaaaakbk","kbbkaaaakbbk",".kkaaaaaakk.",".kaak..kaak.",".kkk....kkk."]);
+LG('flowerbell','꽃방울','풀',[85,70,80,80],[[1,'leaf'],[1,'gust'],[18,'blade'],[24,'forest']],'산들 마을 바람에 딸랑이는 방울꽃 정령. 방울 소리를 들으면 아픈 몬스터가 기운을 차린다.',{k:'#2a1a2a',a:'#ffd0e8',b:'#ff8ac0',c:'#5fbf4a',w:'#ffffff'},
+  [".....cc.....","....cccc....","...kkkkkk...","..kbbbbbbk..",".kbaaaaaabk.",".kakaaaakak.",".kaaabbaaak.","kbaaaaaaaabk","kbbbbbbbbbbk",".kwk.kk.kwk.","..k..kk..k..",".....cc....."]);
+LG('reeddragon','청갈룡','풀',[88,90,78,88],[[1,'leaf'],[1,'bubble'],[20,'blade'],[28,'forest']],'갈대 벌판 깊숙이 숨어 사는 푸른 용. 갈대가 한쪽으로 눕는 날엔 근처를 지나간 것이다.',{k:'#14281a',a:'#3fa85a',b:'#a8e8a0',c:'#ffd23a',w:'#ffffff'},
+  ["..c.c.......","..kkkk......",".kaaaak.....",".kawkaak....","..kaaabk....","...kkabk..kk",".....kabkkak","....kaabkaak","...kaabkaak.","..kaabkaak..","..kaaaaak...","...kkkkk...."]);
+LG('dunesphinx','사구령','땅',[92,88,88,80],[[1,'mud'],[1,'scratch'],[22,'quake'],[30,'drill']],'모래 언덕을 지키는 고양이 모습의 정령. 이마의 푸른 보석은 길 잃은 여행자에게 길을 비춘다.',{k:'#3a2a10',a:'#e8c070',b:'#b08840',c:'#3ad0ff',w:'#ffffff'},
+  ["..k......k..","..kk....kk..","..kbkkkkbk..",".kaaaaaaaak.",".kacaaaacak.",".kaaabbaaak.","..kaaaaaak..",".kbkaaaakbk.","kbbkaaaakbbk","kaaaaaaaaaak","kakakkkkakak",".k.k....k.k."]);
+LG('sunsetwhale','노을래','물',[110,80,90,60],[[1,'bubble'],[1,'tackle'],[22,'wave'],[30,'tide']],'노을 마을 앞바다에 저녁마다 떠오르는 고래. 등에서 뿜는 물줄기가 노을빛으로 물든다.',{k:'#2a1430',a:'#ff8a5a',b:'#ffd0a0',c:'#6a3a8a',w:'#ffffff'},
+  ["..........k.",".........kak","...kkkkk.kak","..kaaaaakak.",".kaaaaaaaak.","kawkaaaaaak.","kaaaaaaaaak.","kbbbbaaaaak.",".kbbbbbbak..","..kkkkkkk...","...c.c.c....","....c.c....."]);
+LG('galaxycat','은하묘','전기',[85,88,76,100],[[1,'zap'],[1,'scratch'],[22,'bolt'],[30,'thunder']],'별빛 도시의 지붕 위를 거니는 별무늬 고양이. 꼬리를 흔들면 밤하늘에 별똥별이 떨어진다.',{k:'#141a3a',a:'#3a4ad0',b:'#ffe9a8',c:'#ffd23a',w:'#ffffff'},
+  [".k......k...",".kk....kk.c.",".kakkkkak.cc","kaaaaaaaak.c","kawaaaawak.c","kaaabbaaak.c",".kaaaaaak.c.","..kacack.c..",".kaaaaaakc..",".kacaacak...",".kaakkaak...",".kkk..kkk..."]);
+LG('icetusk','빙아','얼음',[115,95,95,50],[[1,'frost'],[1,'tackle'],[24,'icicle'],[32,'avalanche']],'서리 고원을 천천히 걷는 거대한 털북숭이. 얼음 엄니로 눈보라를 가른다.',{k:'#1a2a3a',a:'#a8c8e8',b:'#e8f4ff',c:'#ffffff',w:'#5a7a9a'},
+  ["..kkkkkkk...",".kaaaaaaak..","kaaaaaaaaak.","kakaaaaaaak.","kaaaaaaaaaak","kcakaaaaaaak","kcakaaaaaaak",".ckkwwaawwk.",".c.kaakaak..","...kaakaak..","...kbbkbbk..","...kkkkkkk.."]);
+LG('snowfairy','설화','얼음',[80,84,80,98],[[1,'frost'],[1,'gust'],[22,'icicle'],[30,'blizzard']],'눈꽃 마을에 첫눈이 내리는 날 나타나는 요정. 날갯짓 한 번에 눈송이가 꽃처럼 핀다.',{k:'#1a2a4a',a:'#ffffff',b:'#bfe8ff',c:'#7fb8ff',w:'#ffd23a'},
+  ["b....cc....b",".b..cccc..b.","..b.kkkk.b..","...kaaaak...","..kakaakak..","..kaaaaaak..","bbbkaaaakbbb",".bcbkaakbcb.","..bcbkkbcb..","...bc..cb...","..b......b..",".b........b."]);
+LG('thunderkirin','뇌린','전기',[90,96,80,104],[[1,'zap'],[1,'tackle'],[26,'bolt'],[34,'thunder']],'번개 협곡 절벽 위를 번개처럼 달리는 영수. 발굽이 닿는 곳마다 불꽃이 튄다.',{k:'#2a2010',a:'#ffe14d',b:'#3a6ad8',c:'#ffffff',w:'#ff8a3a'},
+  ["...c.....c..","...ck...kc..","....kkkkk...","...kaaaaak..","...kakaaak..","...kaaaaak.c","..kbaaaaakcc",".kbbaaaaaak.","kbbkaaaaaak.","..kaak.kaak.","..kak..kak..","..kk...kk..."]);
+LG('drumgolem','고동','노말',[110,92,100,50],[[1,'tackle'],[1,'rock'],[24,'quake'],[32,'starfall']],'천둥 마을 축제의 북에 깃든 정령. 배를 두드리면 협곡 전체에 천둥소리가 울린다.',{k:'#2a1a10',a:'#c8783a',b:'#f0e0c0',c:'#e5483f',w:'#ffd23a'},
+  ["....kkkk....","...kbbbbk...","..kbkbbkbk..","..kbbbbbbk..","kkkkkkkkkkkk","kaacaacaacak","kaaaaaaaaaak","kwwwwwwwwwwk","kaacaacaacak","kkkkkkkkkkkk",".kak....kak.",".kk......kk."]);
+LG('mistdragon','독무룡','독',[100,98,86,86],[[1,'sting'],[1,'bubble'],[28,'sludge'],[36,'tide']],'독안개 늪의 안개 그 자체라고 불리는 용. 숨을 내쉬면 늪 전체가 보랏빛으로 물든다.',{k:'#1e1028',a:'#7a4aa8',b:'#c8a8e8',c:'#5ad06a',w:'#ffffff'},
+  ["..kk..kk....",".kak.kak....",".kaakaak....","kaaaaaak....","kawkawak....","kaaaaaak.cc.",".kbbbbk.ccc.","..kaaak.ccc.","..kaaaakkk..",".kaabaaaak..","kaabbbaaak..",".kkkkkkkk..."]);
+const RLEG=['whirl','dolttan','flowerbell','reeddragon','dunesphinx','sunsetwhale','galaxycat','icetusk','snowfairy','thunderkirin','drumgolem','mistdragon'];
 for(const[a,lv,b]of[['pebble',30,'boulder'],['toad',30,'toadking'],['fox',16,'hongyeom'],['seal',16,'padorae'],['bunny',16,'supdori'],['bird',18,'stormhawk'],['shroom',20,'shroomking'],['fly',20,'voltfly'],['snowy',28,'snowboss'],['mole',28,'drillmole']])SP[a].evo=[lv,b];
 const FROST6=['snowy','pengu','moth','mole','turtle','lizard'];
 const withEvo=a=>a.flatMap(k=>SP[k].evo?[k,SP[k].evo[1]]:[k]);
-const ORDER=[...withEvo(['fox','seal','bunny','bird','shroom','fly','jelly','crab',...FROST6,...EAST10]),'lumina','monolith','astra','marea','silva','ignis','frosta'];
+const ORDER=[...withEvo(['fox','seal','bunny','bird','shroom','fly','jelly','crab',...FROST6,...EAST10]),'lumina','monolith','astra','marea','silva','ignis','frosta',...RLEG];
 const BASE8=['fox','seal','bunny','bird','shroom','fly','jelly','crab'];
 const GNAME={'노말':'거대 충격','불꽃':'거대 화염','물':'거대 해일','풀':'거대 수풀','전기':'거대 번개','얼음':'거대 빙하','땅':'거대 지진','바위':'거대 암석','독':'거대 독무'};
 const gpow=p=>p<=45?90:p<=60?110:130;
@@ -456,7 +483,7 @@ for(const[x,y]of[[10,9],[11,10],[20,9],[21,10],[13,13],[18,13],[3,10],[28,10],[1
 /* --- 동쪽: 솔바람 숲, 바위 들판, 산들 마을 --- */
 fill(32,0,46,9,'T');fill(33,2,45,8,',');
 for(let x=34;x<=44;x+=3)for(let y=3;y<=7;y+=4)MAP[y][x+((y>>2)%2)]='T';
-fill(39,9,39,10,',');
+fill(39,9,39,10,',');fill(35,9,35,10,',');fill(43,9,43,10,',');
 fill(33,14,46,21,',');fill(48,13,61,21,',');fill(52,16,55,18,'~');
 put([[33,13],[36,14],[41,13],[44,17],[38,19],[47,15],[47,19],[50,14],[58,15],[60,20],[49,21],[56,13]],'r');
 put([[46,13],[46,21],[57,19],[40,16]],'T');
@@ -624,6 +651,21 @@ const RAIDS=[
 const raidPool=R=>R.legend?LEGENDS.map(L=>L.sp).filter(k=>G&&G.lc[k]):R.pool;
 const denAt=(x,y)=>RAIDS.find(R=>R.x===x&&R.y===y);
 const denOn=R=>!!(G&&G.badge&&!G.rd[R.id]&&raidPool(R).length);
+/* 지역 전설 배치: 처음부터 그 자리에 있다(레벨이 곧 난이도) */
+for(const[sp,x,y,lv,place,spark,bg,cry,near,roar,appear,gone]of[
+ ['whirl',42,4,18,'솔바람 숲 한가운데','#9ad8c8',['#1e3a34','#2a5248','#3a6a5a','#4a8a72','#3a7a5a','#6ab08a'],[523,587,659,784,659,523],'...솔잎이 빙글빙글 맴돌기 시작한다.','휘이이잉──!','회오리를 타고 숲의 정령 휘오리가 내려왔다!','회오리가 되어 솔숲 너머로 사라졌다'],
+ ['dolttan',59,17,20,'바위 들판 동쪽','#e5a23a',['#2a2418','#3e3424','#524634','#6a5a44','#5a4a34','#8a7a5a'],[98,110,131,98,82,98],'...주변의 바위들이 조금씩 움직이는 것 같다.','쿠르르릉──!','바위 더미가 일어서더니 바위 곰 돌탄이 되었다!','바위 더미로 흩어져 들판에 섞였다'],
+ ['flowerbell',62,1,16,'산들 마을 북동쪽 언덕','#ff8ac0',['#3a2238','#5a3050','#7a4068','#a85a88','#8a4a70','#e8a8c8'],[1046,880,1046,1318,1046,880],'...어디선가 딸랑딸랑 방울 소리가 들린다.','딸랑──!','꽃잎 사이에서 방울꽃 정령 꽃방울이 피어났다!','꽃잎이 되어 바람에 흩날렸다'],
+ ['reeddragon',52,38,22,'갈대 벌판 깊은 곳','#a8e8a0',['#14301e','#1e4a2a','#2a6438','#3a7e48','#2e6a3a','#6ab07a'],[196,233,262,233,196,175],'...갈대가 일제히 한쪽으로 눕는다.','크르르릉──!','갈대숲을 가르며 푸른 용 청갈룡이 고개를 들었다!','갈대 속으로 스르르 사라졌다'],
+ ['dunesphinx',16,49,25,'모래 언덕길 서쪽 언덕','#3ad0ff',['#3a2a14','#5a4220','#7a5a2e','#a87a3e','#8a6a34','#e8c070'],[294,330,392,330,294,262],'...모래가 소용돌이치며 발밑이 꺼질 것 같다.','샤아아아──!','모래 폭풍 속에서 모래의 정령 사구령이 앉아 있었다!','모래바람이 되어 언덕 너머로 흩어졌다'],
+ ['sunsetwhale',1,67,26,'노을 마을 서쪽 바닷가','#ffd0a0',['#3a1430','#6a2a48','#a84a58','#e87a5a','#c86a5a','#ffb08a'],[131,147,165,147,131,110],'...노을빛 물보라가 바다 위로 솟는다.','부우우웅──!','파도를 가르며 노을 고래 노을래가 떠올랐다!','노을빛 물기둥과 함께 바닷속으로 잠겼다'],
+ ['galaxycat',36,68,28,'별빛 도시 남서쪽 골목','#ffd23a',['#0e1238','#161c4a','#20285e','#2e3a7a','#26306a','#5a64b8'],[784,988,1175,1318,1175,988],'...골목 끝에서 별빛 같은 눈이 반짝인다.','냐아아앙──!','별똥별과 함께 별빛 고양이 은하묘가 내려앉았다!','별빛이 되어 밤하늘로 뛰어올랐다'],
+ ['icetusk',16,91,32,'서리 고원 남쪽 설원','#e8f4ff',['#2a3a50','#3a5068','#4a6a88','#6a8aa8','#5a7a98','#cfe2f4'],[82,98,110,98,82,73],'...땅이 쿵, 쿵 울린다. 거대한 발자국이 보인다.','뿌오오오──!','눈보라를 뚫고 거대한 빙아가 엄니를 치켜들었다!','눈보라 속으로 천천히 걸어 사라졌다'],
+ ['snowfairy',56,77,30,'눈꽃 마을 동쪽 공터','#bfe8ff',['#1a2a4a','#26406a','#345a8a','#4a7aa8','#3e6a98','#bfe8ff'],[1318,1175,1046,1175,1318,1568],'...눈송이가 꽃잎처럼 천천히 떨어진다.','링링──!','눈꽃 사이로 눈의 요정 설화가 날아왔다!','눈송이가 되어 하늘로 날아올랐다'],
+ ['thunderkirin',121,2,36,'번개 협곡 북쪽 절벽 아래','#ffe14d',['#1e2238','#2a3050','#3a4268','#4e5a88','#3e4a78','#ffe14d'],[392,494,587,784,587,494],'...머리 위로 번개가 연달아 내리친다!','히이이잉──!','벼락과 함께 번개의 영수 뇌린이 내려섰다!','번개처럼 협곡 너머로 달려갔다'],
+ ['drumgolem',146,13,35,'천둥 마을 북동쪽 광장','#ffd23a',['#2a1a10','#40281a','#583a24','#784e30','#603e26','#c8783a'],[110,110,147,110,110,165],'...둥, 둥, 북소리가 가슴을 울린다.','두두두둥──!','북소리와 함께 축제의 정령 고동이 일어섰다!','북소리를 남기고 땅속으로 가라앉았다'],
+ ['mistdragon',144,59,38,'독안개 늪 남동쪽 갈대숲','#5ad06a',['#1e1028','#2e1a3e','#3e2656','#563a72','#46305e','#9a7ac0'],[147,139,131,123,117,110],'...안개가 점점 짙어지며 보랏빛으로 변한다.','쉬이이익──!','짙은 안개 속에서 안개의 용 독무룡이 모습을 드러냈다!','보랏빛 안개가 되어 늪 위로 흩어졌다']
+])LEGENDS.push({sp,x,y,lv,cond:()=>!!G,place,spark,bg,cry,near,roar,appear,gone});
 const legendHere=L=>!!(G&&L.cond()&&!G.lc[L.sp]&&!G.lg[L.sp]);
 const legendAt=(x,y)=>LEGENDS.find(L=>L.x===x&&L.y===y&&legendHere(L));
 const tileAt=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?'T':(x===16&&y>=32&&y<=34&&bridgeOpen())?'b':MAP[y][x];
